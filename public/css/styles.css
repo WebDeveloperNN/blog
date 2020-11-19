@@ -1,0 +1,1441 @@
+* {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+/* authorization page */
+
+.authorizationPage {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* bg authorization page  */
+
+.authorizationPage img {
+    height: 100%;
+    width: 100%;
+}
+
+/* authorization form  */
+
+.authorization {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 30px;
+    padding: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+}
+
+.authorization__form {
+    display: flex;
+    flex-direction: column;
+}
+
+.authorization__input {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.authorization__input:hover {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    color: rgba(0, 0, 0, 1);
+}
+
+.authorization__input label {
+    margin-bottom: 10px;
+    font-size: 22px;
+    letter-spacing: 3px;
+}
+
+.authorization__input input {
+    border: 1px solid black;
+    background-color: transparent;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 10px;
+    font-style: oblique;
+}
+
+.authorization__form button {
+    cursor: pointer;
+    border: 1px solid black;
+    background-color: transparent;
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 10px;
+    color: rgba(0, 0, 0, 0.5);
+
+}
+.authorization__form button:hover {
+    color: rgba(0, 0, 0, 1);
+}
+
+/*
+main page */
+.content-wrapper {
+    background-color: #2b2f33;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.menu {
+    width: 200px;
+    position: absolute;
+    height: 100vh;
+    color: #5d8ebd;
+}
+
+.content {
+    padding: 50px 50px 50px 250px;
+    display: grid;
+    background-color: #2b2f33;
+}
+
+/* titles  */
+.themes__title {
+    color: #c6f1ff;
+    line-height: 1.3;
+    font-size: 2em;
+    font-weight: normal;
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+.theme__title {
+    color: #c6f1ff;
+    line-height: 1.3;
+    font-size: 1.8em;
+    border-bottom: 1px solid #5f758f;
+    font-weight: normal;
+    padding-bottom: 5px;
+}
+
+.theme__subtitle {
+    color: #c6f1ff;
+    line-height: 1.3;
+    font-size: 1.4em;
+    font-weight: normal;
+    padding-top: 50px;
+}
+
+.theme_subtitlex2 {
+    color: #c6f1ff;
+    line-height: 1.3;
+    font-size: 1em;
+    font-weight: normal;
+    padding-top: 15px;
+}
+
+
+.theme__text {
+    color: #6aa891;
+    margin: 0.5em 0;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+
+/* Нужно будет передалать ссылки. Не будет разделение, будет просто например: /laravel/basic/ и все уже тут будут все статьи и middleware и так далее. Просто будет меню, в котором будет перекидывать куда надо. Не вижу смысла разделять. */
+/*
+-----------------------------
+<div class="themes">
+    <div class="theme">
+    </div>
+</div>
+-----------------------------
+<h1 class="themes__title"></h1>
+<h2 class="theme__title"></h2>
+<h3 class="theme__subtitle"></h3>
+<h4 class="theme_subtitlex2"></h4>
+<p class="theme__text"></p>
+-------------------------------
+<code>
+<pre>
+
+</pre>
+</code>
+*/
+
+/* я отмечал в файлах красным что нужно перечитать потом и добавить или нет. */
+
+/* наверное поменять надо */
+pre {
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	overflow: auto;
+	overflow-y: hidden;
+	font-size: 16px;
+	line-height: 25px;
+    border-left: 0.1px solid #5f758f;
+    color: #6aa891;
+    padding-left: 10px;
+    margin: 15px 0px;
+}
+
+
+tr {
+
+}
+
+table {
+    border-collapse: collapse;
+    margin: 10px 0px;
+}
+
+td {
+    border: 1px solid #6aa891;
+    padding: 8px;
+    color: #6aa891;
+    margin: 0.5em 0;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+.theme {
+    padding-bottom: 350px;
+}
+
+.menu__logo {
+    color: #c6f1ff;
+    line-height: 1.3;
+    font-size: 1.8em;
+    font-weight: normal;
+    padding: 50px 30px 0px 30px;
+    letter-spacing: 5px;
+    animation: neon 150s ease-in-out infinite alternate;
+}
+
+.menu__items {
+    padding: 30px 30px;
+}
+
+
+.menu__item {
+    padding-bottom: 15px;
+}
+
+@keyframes neon {
+    0% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    1% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    2.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    2.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    2.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    3% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    4% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    5% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    6% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    6.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    6.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    6.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    6.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    6.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    6.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    6.16% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    7% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    8% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    9% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    10% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    10.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    10.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    10.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    10.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    10.12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    11% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    13% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    14% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    14.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    14.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    14.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    14.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    14.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    14.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    14.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    14.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    14.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    15% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    16% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    17% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    18% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    19% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    20% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    20.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    20.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    20.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    20.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    20.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    20.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    20.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    20.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    20.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    21% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    22% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    22.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    22.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    22.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    22.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    22.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    22.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    22.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    22.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    22.2% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    22.22% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    22.24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    23% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    25% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    26% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    26.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    26.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    26.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    27% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    28% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    29% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    30% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    30.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    30.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    30.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    31% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    32% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    32.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    32.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    32.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    33% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    34% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    34.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    34.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    34.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    35% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    36% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    37% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    38% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    39% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    40% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    40.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    40.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    40.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    40.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    40.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    40.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    40.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    40.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    40.2% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    40.22% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    40.24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    41% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    42% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    42.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    42.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    42.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    43% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    44% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    45% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    46% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    47% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    48% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    48.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    48.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    48.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    48.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    48.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    48.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    48.16% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    49% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    50% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    50.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    50.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    50.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    50.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    50.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    50.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    50.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    50.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    50.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    51% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    52% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    53% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    54% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    54.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    54.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    54.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    54.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    54.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    54.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    54.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    54.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    54.2% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    54.22% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    54.24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    55% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    56% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    57% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    58% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    59% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    60% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    61% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    62% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    62.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    62.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    62.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    62.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    62.12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    63% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    64% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    65% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    66% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    66.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    66.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    66.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    66.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    66.12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    67% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    68% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    68.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    68.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    68.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    68.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    68.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    68.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    68.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    68.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    68.2% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    68.22% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    68.24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    69% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    70% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    71% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    72% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    73% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    74% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    75% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    76% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    76.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    76.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    76.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    76.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    76.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    76.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    76.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    76.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    76.2% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    76.22% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    76.24% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    77% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    78% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    78.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    78.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    78.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    78.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    78.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    78.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    78.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    78.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    78.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    79% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    80% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    80.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    80.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    80.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    80.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    80.12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    81% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    82% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    82.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    82.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    82.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    82.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    82.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    82.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    82.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    82.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    82.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    83% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    84% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    84.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    84.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    84.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    84.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    84.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    84.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    84.16% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    85% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    86% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    86.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    86.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    86.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    86.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    86.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    86.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    86.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    86.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    86.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    87% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    88% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    88.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    88.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    88.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    88.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    88.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    88.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    88.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    88.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    88.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    89% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    90% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    91% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    92% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    92.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    92.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    92.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    92.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    92.12% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    93% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    94% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    94.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    94.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    94.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    94.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    94.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    94.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    94.16% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    95% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    96% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    96.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    96.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    96.08% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    96.1% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    96.12% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    96.14% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    96.16% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    96.18% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    96.2% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    97% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    98% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    98.04% {
+        color: #96e4ff;
+        text-shadow: unset;
+    }
+    98.06% {
+        color: #ffffff;
+        text-shadow: 0 0 2px #ffffff,0 0 4px #c6f1ff,0 0 6px #c6f1ff;
+    }
+    98.08% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+    99% {
+        color: #c6f1ff;
+        text-shadow: 0 0 2px #c6f1ff,0 0 4px #c6f1ff,0 0 8px #96e4ff;
+    }
+    100% {
+        color: #c6f1ff;
+        text-shadow: 0 0 1px #c6f1ff,0 0 4px #c6f1ff,0 0 6px #96e4ff;
+    }
+}
+
