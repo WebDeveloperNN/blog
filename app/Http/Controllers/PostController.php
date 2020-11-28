@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use DataService;
 
 class PostController extends Controller
 {
@@ -13,7 +14,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        // $test = new DataCheck();
+        // $test = $test->isValid();
+        $test = DataService::isValid();
+
+        return view('mainPage', compact('test'));
     }
 
     /**

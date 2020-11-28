@@ -18,12 +18,14 @@ use App\Http\Controllers\AuthorizationController;
 use App\Http\Controllers\PostController;
 use App\Models\Technology;
 
+
+
 Route::get('/login', [AuthorizationController::class, 'index']);
 
-Route::get('/', function() {
+// Route::get('/', function() {
 
-    return view('mainPage');
-});
+//     return view('mainPage');
+// });
 
 // Route::get('/laravel/prologue/', function() {
 //     return view('posts.laravel.prologue.prologue');
@@ -45,8 +47,13 @@ Route::get('/laravel/basic', function() {
     return view('laravel.basic.index');
 });
 
+Route::get('/laravel/fronted', function() {
+    return view('laravel.frontend.index');
+});
+
 Route::get('/{technology}/{chapter}/{theme}', [PostController::class, 'show']);
 Route::get('/{technology}', function() {return 'menu';});
+
 
 
 
