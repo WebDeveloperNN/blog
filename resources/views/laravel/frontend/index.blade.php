@@ -29,57 +29,55 @@
         </p>
 <code>
 <pre>
-< html>
 < head>
-    < title>App Name - @ yield('title')</>
-</>
+    < title>App Name - @@yield('title')</>
+< /head>
 < body>
-    @ section('sidebar')
+    @@section('sidebar')
         This is the master sidebar.
-    @ show
+    @@show
 
     < div class="container">
-        @ yield('content')
-    </>
-</>
-</>
+       @@yield('content')
+    < /div>
+< /body>
 </pre>
 </code>
         <p class="theme__text">
-            Директива @ section определяет секцию содержимого.<br>
-            Директива @ yield используется для отображения содержимого заданной секции.<br>
+            Директива @@section определяет секцию содержимого.<br>
+            Директива @@yield используется для отображения содержимого заданной секции.<br>
             Мы определили макет для нашего приложения, давайте определим дочернюю страницу, которая унаследует макет.
         </p>
         <h4 class="theme_subtitlex2">
             Наследование макета
         </h4>
         <p class="theme__text">
-            При определении дочернего шаблона используйте Blade-директиву @extends для указания макета, который должен быть "унаследован" дочерним шаблоном. Шаблоны, которые наследуют макет Blade, могут внедрять содержимое в секции макета с помощью директив @section. Запомните, как видно из приведённого выше примера, содержимое этих секций будет отображено в макете при помощи @yield:
+            При определении дочернего шаблона используйте Blade-директиву @@extends для указания макета, который должен быть "унаследован" дочерним шаблоном. Шаблоны, которые наследуют макет Blade, могут внедрять содержимое в секции макета с помощью директив @@section. Запомните, как видно из приведённого выше примера, содержимое этих секций будет отображено в макете при помощи @@yield:
         </p>
 <code>
 <pre>
-    @extends('layouts.app')
-@section('title', 'Page Title')
-@section('sidebar')
-    @parent
-    <p>This is appended to the master sidebar.</p>
-@endsection
-@section('content')
-    <p>This is my body content.</p>
-@endsection
+@@extends('layouts.app')
+@@section('title', 'Page Title')
+@@section('sidebar')
+    @@parent
+    < p>This is appended to the master sidebar.</>
+@@endsection
+@@section('content')
+    < p>This is my body content.</>
+@@sendsection
 </pre>
 </code>
 <p class="theme__text">
-    В этом примере секция sidebar использует директиву @parent для дополнения (а не перезаписи) содержимого к боковой панели макета. Директива @parent будет заменена содержимым макета при отрисовке шаблона.
-
-    В отличие от предыдущего примера, секция sidebar заканчивается на @endsection вместо @show. Директива @endsection будет только определять секцию, в то время как @show будет определять и немедленно вставлять секцию
-
-    Директива @yield также принимает значение по умолчанию в качестве второго параметра. Это значение будет отображено, если получаемый раздел не определен:
+    В этом примере секция sidebar использует директиву @ parent для дополнения (а не перезаписи) содержимого к боковой панели макета. Директива @ parent будет заменена содержимым макета при отрисовке шаблона.
+    <br><br>
+    В отличие от предыдущего примера, секция sidebar заканчивается на @@endsection вместо @@show. Директива @@endsection будет только определять секцию, в то время как @@show будет определять и немедленно вставлять секцию.
+    <br><br>
+    Директива @@yield также принимает значение по умолчанию в качестве второго параметра. Это значение будет отображено, если получаемый раздел не определен:
 </p>
 <code>
 <pre>
-    @yield('content', View::make('view.name'))
-@yield('content', view('view.name'))
+@@yield('content', View::make('view.name'))
+@@yield('content', view('view.name'))
 </pre>
 </code>
 <p class="theme__text">
@@ -87,9 +85,9 @@
 </p>
 <code>
 <pre>
-    Route::get('blade', function () {
-        return view('child');
-    });
+Route::get('blade', function () {
+    return view('child');
+});
 </pre>
 </code>
 <h3 class="theme__subtitle">Отображение данных</h3>
@@ -98,9 +96,9 @@
 </p>
 <code>
 <pre>
-    Route::get('greeting', function () {
-        return view('welcome', ['name' => 'Samantha']);
-    });
+Route::get('greeting', function () {
+    return view('welcome', ['name' => 'Samantha']);
+});
 </pre>
 </code>
 <p class="theme__text">
@@ -108,31 +106,24 @@
 </p>
 <code>
 <pre>
-    $city  = "San Francisco";
-$state = "CA";
-$event = "SIGGRAPH";
-
-$location_vars = array("city", "state");
-
-$result = compact("event", $location_vars);
-print_r($result);
-Результат выполнения данного примера:
+Route::get('greeting', function () {
+    $name = 'artem';
+    return view('welcome', compact('name'));
+});
+// Результат выполнения данного примера:
+// app\views\welcome.blade.php
 Array
 (
-    [event] => SIGGRAPH
-    [city] => San Francisco
-    [state] => CA
+    [name] => artem
 )
-
 </pre>
 </code>
 <p class="theme__text">
-    Вы можете отобразить содержимое переменной name следующим образом:
+    Вы можете отобразить содержимое переменной следующим образом:
 </p>
 <code>
 <pre>
-    Hello, {{ $name }}.
-Сity, {{ $ city }}.
+    Hello, @{{ $name }}.
 </pre>
 </code>
 <p class="theme__text">
@@ -140,14 +131,14 @@ Array
 </p>
 <code>
 <pre>
-The current UNIX timestamp is {{ time() }}.
+The current UNIX timestamp is { { time() }}.
 </pre>
 </code>
         <h4 class="theme_subtitlex2">
             Отображение экранированных данных
         </h4>
         <p class="theme__text">
-            Операторы Blade {{}} автоматически отправляются через функцию PHP htmlspecialchars для предотвращения атак XSS.
+            Операторы Blade { {}} автоматически отправляются через функцию PHP htmlspecialchars для предотвращения атак XSS.
         </p>
         <h4 class="theme_subtitlex2">
             Отображение неэкранированных данных
@@ -157,7 +148,7 @@ The current UNIX timestamp is {{ time() }}.
         </p>
 <code>
 <pre>
-    Hello, {!! $name !!}.
+Hello, @{!! $name !!}.
 </pre>
 </code>
 <p class="theme__text">
@@ -169,21 +160,20 @@ The current UNIX timestamp is {{ time() }}.
 </p>
 <code>
 <pre>
-    <>
-        var app = <?php echo json_encode($array); ?>;
-    </>
+< script>
+    var app = < ?php echo json_encode($array); ?>;
+< /script>
 </pre>
 </code>
 <p class="theme__text">
-    Однако вместо ручного вызова json_encode вы можете использовать директиву @json Blade. Директива @json принимает те же аргументы, что и функция PHP json_encode:
+    Однако вместо ручного вызова json_encode вы можете использовать директиву @ json Blade. Директива @ json принимает те же аргументы, что и функция PHP json_encode:
 </p>
 <code>
 <pre>
-    < script>
+< script>
     var app = @ json($array);
-
     var app = @ json($array, JSON_PRETTY_PRINT);
-    </>
+< /script>
 </pre>
 </code>
 <p class="theme__text">
@@ -202,11 +192,6 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
     public function boot()
     {
         Blade::withoutDoubleEncoding();
@@ -220,22 +205,21 @@ class AppServiceProvider extends ServiceProvider
 </p>
 <code>
 <pre>
-    <h1>Laravel</h1>
-
 Hello, @{{ name }}.
 </pre>
 </code>
 <p class="theme__text">
-    В этом примере Blade удалит символ @, но выражение {{ name }} останется нетронутым, что позволит вашему JavaScript-фреймворку отрисовать его вместо Blade.
-
-Символ @ также может использоваться для выхода из директив Blade:
+    В этом примере Blade удалит символ @, но выражение @{{ name }} останется нетронутым, что позволит вашему JavaScript-фреймворку отрисовать его вместо Blade.
+    <br>
+    <br>
+    Символ @ также может использоваться для выхода из директив Blade:
 </p>
 <code>
 <pre>
-    {{-- Blade --}}
+// Blade
 @@json()
 
-<!-- HTML output -->
+// HTML output
 @ json()
 </pre>
 </code>
@@ -245,11 +229,11 @@ Hello, @{{ name }}.
 </p>
 <code>
 <pre>
-    @ verbatim
-    < div class="container">
-        Hello, {{ name }}.
-    </>
-    @ endverbatim
+@@verbatim
+< div class="container">
+    Hello, @{{ name }}.
+< /div>
+@@endverbatim
 </pre>
 </code>
 <h3 class="theme__subtitle">Управляющие конструкции</h3>
@@ -301,31 +285,31 @@ I don't have any records!
     Authentication Directives
 </h4>
 <p class="theme__text">
-    Директивы @auth и @guest могут использоваться для быстрого определения, аутентифицирован ли текущий пользователь или является гостем:
+    Директивы @ auth и @ guest могут использоваться для быстрого определения, аутентифицирован ли текущий пользователь или является гостем:
 </p>
 <code>
 <pre>
-    @auth
+@ auth
     // The user is authenticated...
-@endauth
+@ endauth
 
-@guest
+@ guest
     // The user is not authenticated...
-@endguest
+@ endguest
 </pre>
 </code>
 <p class="theme__text">
-    При необходимости вы можете указать защиту аутентификации, которую следует проверять при использовании директив @auth и @guest:
+    При необходимости вы можете указать защиту аутентификации, которую следует проверять при использовании директив @ auth и @ guest:
 </p>
 <code>
 <pre>
-    @auth('admin')
+@ auth('admin')
     // The user is authenticated...
-@endauth
+@ endauth
 
-@guest('admin')
+@ guest('admin')
     // The user is not authenticated...
-@endguest
+@ endguest
 </pre>
 </code>
 <h4 class="theme_subtitlex2"></h4>
@@ -336,17 +320,17 @@ I don't have any records!
 </code>
 <h4 class="theme_subtitlex2">Section Directives</h4>
 <p class="theme__text">
-    Вы можете проверить, есть ли в разделе контент, используя директиву @hasSection:
+    Вы можете проверить, есть ли в разделе контент, используя директиву @ hasSection:
 </p>
 <code>
 <pre>
-    @hasSection('navigation')
-    <div class="pull-right">
-        @yield('navigation')
-    </div>
+@ hasSection('navigation')
+< div class="pull-right">
+    @ yield('navigation')
+< /div>
 
-    <div class="clearfix"></div>
-@endif
+< div class="clearfix">< /div>
+@ endif
 </pre>
 </code>
 <p class="theme__text">
@@ -354,60 +338,60 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @sectionMissing('navigation')
-    <div class="pull-right">
-        @include('default-navigation')
-    </div>
-@endif
+@@sectionMissing('navigation')
+    < div class="pull-right">
+        @@include('default-navigation')
+    < /div>
+@@endif
 </pre>
 </code>
 <h4 class="theme_subtitlex2">
-    Environment Directives
+    Directives окржения
 </h4>
 <p class="theme__text">
-    Вы можете проверить, работает ли приложение в производственной среде, с помощью директивы @production:
+    Вы можете проверить, работает ли приложение в производственной среде, с помощью директивы @ production:
 </p>
 <code>
 <pre>
-    @production
+@ production
     // Production specific content...
-@endproduction
+@ endproduction
 </pre>
 </code>
 <p class="theme__text">
-    Или вы можете определить, работает ли приложение в определенной среде, с помощью директивы @env:
+    Или вы можете определить, работает ли приложение в определенной среде, с помощью директивы @ env:
 </p>
 <code>
 <pre>
-    @env('staging')
+@ env('staging')
     // The application is running in "staging"...
-@endenv
+@ endenv
 
-@env(['staging', 'production'])
+@ env(['staging', 'production'])
     // The application is running in "staging" or "production"...
-@endenv
+@ endenv
 </pre>
 </code>
 <h4 class="theme_subtitlex2">
     Switch Statements
 </h4>
 <p class="theme__text">
-    Операторы переключения могут быть созданы с помощью директив @switch, @case, @break, @default и @endswitch:
+    Операторы переключения могут быть созданы с помощью директив @ switch, @ case, @ break, @ default и @ endswitch:
 </p>
 <code>
 <pre>
-    @switch($i)
-    @case(1)
-        First case...
-        @break
+@ switch($i)
+@ case(1)
+    First case...
+    @ break
 
-    @case(2)
-        Second case...
-        @break
+@ case(2)
+    Second case...
+    @ break
 
-    @default
-        Default case...
-@endswitch
+@ default
+    Default case...
+@ endswitch
 </pre>
 </code>
 <h4 class="theme_subtitlex2">Loops</h4>
@@ -416,23 +400,23 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @for ($i = 0; $i < 10; $i++)
-    The current value is {{ $i }}
-@endfor
+@ for ($i = 0; $i < 10; $i++)
+    The current value is { { $i }}
+@ endfor
 
-@foreach ($users as $user)
-    <p>This is user {{ $user->id }}</p>
-@endforeach
+@ foreach ($users as $user)
+    < p>This is user { { $user->id }}</>
+@ endforeach
 
-@forelse ($users as $user)
-    <li>{{ $user->name }}</li>
-@empty
-    <p>No users</p>
-@endforelse
+@ forelse ($users as $user)
+    < li>{ { $user->name }}</>
+@ empty
+    < p>No users</>
+@ endforelse
 
-@while (true)
-    <p>I'm looping forever.</p>
-@endwhile
+@ while (true)
+    < p>I'm looping forever.</>
+@ endwhile
 </pre>
 </code>
 <p class="theme__text">
@@ -441,29 +425,29 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @foreach ($users as $user)
-    @if ($user->type == 1)
-        @continue
-    @endif
+@ foreach ($users as $user)
+    @ if ($user->type == 1)
+        @ continue
+    @ endif
 
-    <li>{{ $user->name }}</li>
+    < li>{ { $user->name }}</>
 
-    @if ($user->number == 5)
-        @break
-    @endif
-@endforeach
+    @ if ($user->number == 5)
+        @ break
+    @ endif
+@ endforeach
 </pre>
 </code>
 <p class="theme__text">Вы также можете включить условие с объявлением директивы в одну строку:</p>
 <code>
 <pre>
-    @foreach ($users as $user)
-    @continue($user->type == 1)
+@ foreach ($users as $user)
+    @ continue($user->type == 1)
 
-    <li>{{ $user->name }}</li>
+    < li>{ { $user->name }}</>
 
-    @break($user->number == 5)
-@endforeach
+    @ break($user->number == 5)
+@ endforeach
 </pre>
 </code>
 <h4 class="theme_subtitlex2">The Loop Variable</h4>
@@ -472,17 +456,17 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @foreach ($users as $user)
-    @if ($loop->first)
+@ foreach ($users as $user)
+    @ if ($loop->first)
         This is the first iteration.
-    @endif
+    @ endif
 
-    @if ($loop->last)
+    @ if ($loop->last)
         This is the last iteration.
-    @endif
+    @ endif
 
-    <p>This is user {{ $user->id }}</p>
-@endforeach
+    < p>This is user { { $user->id }}</>
+@ endforeach
 </pre>
 </code>
 <p class="theme__text">
@@ -490,13 +474,13 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @foreach ($users as $user)
-    @foreach ($user->posts as $post)
-        @if ($loop->parent->first)
+@ foreach ($users as $user)
+    @ foreach ($user->posts as $post)
+        @ if ($loop->parent->first)
             This is first iteration of the parent loop.
-        @endif
-    @endforeach
-@endforeach
+        @ endif
+    @ endforeach
+@ endforeach
 </pre>
 </code>
 <p class="theme__text">
@@ -585,7 +569,7 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    {{-- Этого комментария не будет в итоговом HTML --}}
+{ {-- Этого комментария не будет в итоговом HTML --}}
 </pre>
 </code>
 <h3 class="theme__subtitle">PHP</h3>
@@ -594,9 +578,9 @@ I don't have any records!
 </p>
 <code>
 <pre>
-@php
+@@php
     //
-@endphp
+@@endphp
 </pre>
 </code>
 <p class="theme__text">
@@ -608,13 +592,13 @@ I don't have any records!
 </p>
 <code>
 <pre>
-    @once
-    @push('scripts')
+@ once
+    @ push('scripts')
         < script>
             // Your custom JavaScript...
         </>
-    @endpush
-@endonce
+    @ endpush
+@ endonce
 </pre>
 </code>
 <h3 class="theme__subtitle">Формы</h3>
@@ -625,7 +609,7 @@ I don't have any records!
 <code>
 <pre>
     < form method="POST" action="/profile">
-        @csrf
+        @ csrf
 
         ...
     </>
@@ -633,12 +617,12 @@ I don't have any records!
 </code>
 <h4 class="theme_subtitlex2">Method Field</h4>
 <p class="theme__text">
-    Поскольку HTML-формы не могут выполнять запросы PUT, PATCH или DELETE, вам нужно будет добавить скрытое поле _method для подмены этих HTTP-глаголов. Директива @method Blade может создать для вас это поле:
+    Поскольку HTML-формы не могут выполнять запросы PUT, PATCH или DELETE, вам нужно будет добавить скрытое поле _method для подмены этих HTTP-глаголов. Директива @ method Blade может создать для вас это поле:
 </p>
 <code>
 <pre>
     < form action="/foo/bar" method="POST">
-        @method('PUT')
+        @ method('PUT')
 
         ...
     </>
@@ -646,7 +630,7 @@ I don't have any records!
 </code>
 <h4 class="theme_subtitlex2">Validation Errors</h4>
 <p class="theme__text">
-    Директива @error может использоваться для быстрой проверки наличия сообщений об ошибках проверки для данного атрибута. В директиве @error вы можете повторить переменную $ message, чтобы отобразить сообщение об ошибке:
+    Директива @ error может использоваться для быстрой проверки наличия сообщений об ошибках проверки для данного атрибута. В директиве @ error вы можете повторить переменную $ message, чтобы отобразить сообщение об ошибке:
 </p>
 <code>
 <pre>
@@ -654,15 +638,15 @@ I don't have any records!
 
 < label for="title">Post Title</>
 
-< input id="title" type="text" class="@error('title') is-invalid @enderror">
+< input id="title" type="text" class="@ error('title') is-invalid @ enderror">
 
-@error('title')
-    < div class="alert alert-danger">{{ $message }}</>
-@enderror
+@ error('title')
+    < div class="alert alert-danger">{ { $message }}</>
+@ enderror
 </pre>
 </code>
 <p class="theme__text">
-    Вы можете передать имя определенного пакета ошибок в качестве второго параметра директиве @error для получения сообщений об ошибках проверки на страницах, содержащих несколько форм:
+    Вы можете передать имя определенного пакета ошибок в качестве второго параметра директиве @ error для получения сообщений об ошибках проверки на страницах, содержащих несколько форм:
 </p>
 <code>
 <pre>
@@ -670,14 +654,14 @@ I don't have any records!
 
 < label for="email">Email address</>
 
-< input id="email" type="email" class="@error('email', 'login') is-invalid @enderror">
+< input id="email" type="email" class="@ error('email', 'login') is-invalid @ enderror">
 
-@error('email', 'login')
-    < div class="alert alert-danger">{{ $message }}</>
-@enderror
+@ error('email', 'login')
+    < div class="alert alert-danger">{ { $message }}</>
+@ enderror
 </pre>
 </code>
-<h3 class="theme__subtitle">Components</h3>
+<h3 class="theme__subtitle">Компоненты</h3>
 <p class="theme__text">
     Компоненты и слоты предоставляют аналогичные преимущества для секций и макетов; однако, некоторые могут счесть ментальную модель компонентов и слотов более простой в понимании.  Можно использовать компоненты вместо макетов и секций, а можно вместе. Компоненты и слоты — это другой подход для решения той же задачи.
 Есть два подхода к написанию компонентов: компоненты на основе классов и анонимные компоненты.
@@ -718,7 +702,7 @@ public function boot()
 </p>
 <code>
 <pre>
-    < x-package-alert/>
+    < x -package-alert/>
 </pre>
 </code>
 <p class="theme__text">
@@ -742,8 +726,8 @@ public function boot()
 </p>
 <code>
 <pre>
-    < x-nightshade::calendar />
-    < x-nightshade::color-picker />
+    < x -nightshade::calendar />
+    < x -nightshade::color-picker />
 </pre>
 </code>
 <p class="theme__text">
@@ -751,12 +735,12 @@ public function boot()
 </p>
 <h4 class="theme_subtitlex2">Отображение компонентов</h4>
 <p class="theme__text">
-    Для отображения компонента вы можете использовать тег компонента Blade в одном из ваших шаблонов Blade. Теги компонентов Blade начинаются со строки x-, за которой следует имя кебаба класса компонента:
+    Для отображения компонента вы можете использовать тег компонента Blade в одном из ваших шаблонов Blade. Теги компонентов Blade начинаются со строки x - , за которой следует имя кебаба класса компонента:
 </p>
 <code>
 <pre>
-    < x-alert/>
-    < x-user-profile/>
+    < x - alert/>
+    < x - user-profile/>
 </pre>
 </code>
 <p class="theme__text">
@@ -764,7 +748,7 @@ public function boot()
 </p>
 <code>
 <pre>
-    < x-inputs.button/>
+    < x - inputs.button/>
 </pre>
 </code>
 <h4 class="theme_subtitlex2">
@@ -775,7 +759,7 @@ public function boot()
 </p>
 <code>
 <pre>
-    < x-alert type="error" :message="$message"/>
+    < x - alert type="error" :message="$message"/>
 </pre>
 </code>
 <p class="theme__text">
@@ -833,8 +817,8 @@ class Alert extends Component
 </p>
 <code>
 <pre>
-    < div class="alert alert-{{ $type }}">
-        {{ $message }}
+    < div class="alert alert-{ { $type }}">
+        { { $message }}
     </>
 </pre>
 </code>
@@ -865,7 +849,7 @@ public function __construct($alertType)
 </p>
 <code>
 <pre>
-    < x-alert alert-type="danger" />
+    < x - alert alert-type="danger" />
 </pre>
 </code>
 <h3 class="theme__subtitle">Методы компонентов</h3>
@@ -891,8 +875,8 @@ public function isSelected($option)
 </p>
 <code>
 <pre>
-    < option {{ $isSelected($value) ? 'selected="selected"' : '' }} value="{{ $value }}">
-        {{ $label }}
+    < option { { $isSelected($value) ? 'selected="selected"' : '' }} value="{ { $value }}">
+        { { $label }}
     </>
 </pre>
 </code>
@@ -914,13 +898,13 @@ public function render()
         // $data['attributes'];
         // $data['slot'];
 
-        return '<div>Components content</div>';
+        return '< div>Components content</>';
     };
 }
 </pre>
 </code>
 <p class="theme__text">
-    ComponentName равно имени, используемому в теге HTML после префикса x-. Таким образом, имя компонента <x-alert /> будет alert. Элемент attributes будет содержать все атрибуты, которые присутствовали в теге HTML. Элемент slot - это экземпляр Illuminate \ Support \ HtmlString с содержимым слота из компонента.
+    ComponentName равно имени, используемому в теге HTML после префикса x - . Таким образом, имя компонента < x - alert /> будет alert. Элемент attributes будет содержать все атрибуты, которые присутствовали в теге HTML. Элемент slot - это экземпляр Illuminate \ Support \ HtmlString с содержимым слота из компонента.
 
 Замыкание должно вернуть строку. Если возвращенная строка соответствует существующему представлению, это представление будет визуализировано; в противном случае возвращенная строка будет оцениваться как встроенное представление Blade.
 </p>
@@ -956,7 +940,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < x-alert type="error" :message="$message" class="mt-4"/>
+    < x - alert type="error" :message="$message" class="mt-4"/>
 </pre>
 </code>
 <p class="theme__text">
@@ -964,13 +948,13 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < div {{ $attributes }}>
+    < div { { $attributes }}>
         <!-- Component Content -->
     </>
 </pre>
 </code>
 <p class="theme__text">
-    Использование директив, таких как @env, непосредственно в компоненте в настоящее время не поддерживается.
+    Использование директив, таких как @ env, непосредственно в компоненте в настоящее время не поддерживается.
 </p>
 <h4 class="theme_subtitlex2">Атрибуты по умолчанию / объединенные атрибуты</h4>
 <p class="theme__text">
@@ -978,8 +962,8 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < div {{ $attributes->merge(['class' => 'alert alert-'.$type]) }}>
-        {{ $message }}
+    < div { { $attributes->merge(['class' => 'alert alert-'.$type]) }}>
+        { { $message }}
     </>
 </pre>
 </code>
@@ -988,7 +972,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < x-alert type="error" :message="$message" class="mb-4"/>
+    < x - alert type="error" :message="$message" class="mb-4"/>
 </pre>
 </code>
 <p class="theme__text">
@@ -1009,8 +993,8 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < button {{ $attributes->merge(['type' => 'button']) }}>
-        {{ $slot }}
+    < button { { $attributes->merge(['type' => 'button']) }}>
+        { { $slot }}
     </>
 </pre>
 </code>
@@ -1019,7 +1003,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < x-button type="submit">
+    < x - button type="submit">
         Submit
     </>
 </pre>
@@ -1039,8 +1023,8 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < div {{ $attributes->merge(['data-controller' => $attributes->prepends('profile-controller')]) }}>
-        {{ $slot }}
+    < div { { $attributes->merge(['data-controller' => $attributes->prepends('profile-controller')]) }}>
+        { { $slot }}
     </>
 </pre>
 </code>
@@ -1050,7 +1034,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    {{ $attributes->filter(fn ($value, $key) => $key == 'foo') }}
+    { { $attributes->filter(fn ($value, $key) => $key == 'foo') }}
 </pre>
 </code>
 <p class="theme__text">
@@ -1058,7 +1042,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    {{ $attributes->whereStartsWith('wire:model') }}
+    { { $attributes->whereStartsWith('wire:model') }}
 </pre>
 </code>
 <p class="theme__text">
@@ -1066,7 +1050,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    {{ $attributes->whereStartsWith('wire:model')->first() }}
+    { { $attributes->whereStartsWith('wire:model')->first() }}
 </pre>
 </code>
 <h3 class="theme__subtitle">
@@ -1079,7 +1063,7 @@ public function __construct(AlertCreator $creator, $type, $message)
 <pre>
     <!-- /resources/views/components/alert.blade.php -->
     < div class="alert alert-danger">
-        {{ $slot }}
+        { { $slot }}
     </>
 </pre>
 </code>
@@ -1088,8 +1072,8 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < x-alert>
-        <strong>Whoops!</strong> Something went wrong!
+    < x - alert>
+        < strong>Whoops!</> Something went wrong!
     </>
 </pre>
 </code>
@@ -1100,30 +1084,30 @@ public function __construct(AlertCreator $creator, $type, $message)
 <pre>
     <!-- /resources/views/components/alert.blade.php -->
 
-< span class="alert-title">{{ $title }}</>
+< span class="alert-title">{ { $title }}</>
 
 < div class="alert alert-danger">
-    {{ $slot }}
+    { { $slot }}
 </>
 
 </pre>
 </code>
 <p class="theme__text">
-    Вы можете определить содержимое названного слота, используя тег x-slot. Любой контент, не входящий в тег x-slot, будет передан компоненту в переменной $ slot:
+    Вы можете определить содержимое названного слота, используя тег x - slot. Любой контент, не входящий в тег x - slot, будет передан компоненту в переменной $ slot:
 </p>
 <code>
 <pre>
-    < x-alert>
-        <x-slot name="title">
+    < x - alert>
+        < x - slot name="title">
             Server Error
-        </x-slot>
+        </>
 
-        <strong>Whoops!</strong> Something went wrong!
+        < strong>Whoops!</> Something went wrong!
     </>
 </pre>
 </code>
 <p class="theme__text">
-    Я понял так, что если мы используем x-slot это аналогия, как будто мы создаем переменную в классе и иницилизируем ее с помощью конструктора.
+    Я понял так, что если мы используем x - slot это аналогия, как будто мы создаем переменную в классе и иницилизируем ее с помощью конструктора.
 Возможно компоненты будут для вас удобнее, попробуйте!
 </p>
 <h4 class="theme_subtitlex2">Слоты с ограниченным доступом</h4>
@@ -1132,12 +1116,12 @@ public function __construct(AlertCreator $creator, $type, $message)
 </p>
 <code>
 <pre>
-    < x-alert>
-        <x-slot name="title">
-            {{ $component->formatAlert('Server Error') }}
-        </x-slot>
+    < x - alert>
+        < x - slot name="title">
+            { { $component->formatAlert('Server Error') }}
+        </>
 
-        <strong>Whoops!</strong> Something went wrong!
+        < strong>Whoops!</> Something went wrong!
     </>
 </pre>
 </code>
@@ -1156,7 +1140,7 @@ public function render()
 {
     return <<<'blade'
         < div class="alert alert-danger">
-            {{ $slot }}
+            { { $slot }}
         </>
     blade;
 }
@@ -1179,7 +1163,7 @@ public function render()
 </p>
 <code>
 <pre>
-    < x-alert/>
+    < x - alert/>
 </pre>
 </code>
 <p class="theme__text">
@@ -1187,14 +1171,14 @@ public function render()
 </p>
 <code>
 <pre>
-    < x-inputs.button/>
+    < x - inputs.button/>
 </pre>
 </code>
 <h3 class="theme__subtitle">Свойства / атрибуты данных</h3>
 <p class="theme__text">
     Поскольку анонимные компоненты не имеют ассоциированного класса, вы можете задаться вопросом, как можно различить, какие данные должны быть переданы компоненту как переменные, а какие атрибуты должны быть помещены в пакет атрибутов компонента.
 
-Вы можете указать, какие атрибуты следует рассматривать как переменные данных, используя директиву @props в верхней части шаблона Blade вашего компонента. Все остальные атрибуты компонента будут доступны через мешок атрибутов компонента. Если вы хотите присвоить переменной данных значение по умолчанию, вы можете указать имя переменной в качестве ключа массива и значение по умолчанию в качестве значения массива:
+Вы можете указать, какие атрибуты следует рассматривать как переменные данных, используя директиву @ props в верхней части шаблона Blade вашего компонента. Все остальные атрибуты компонента будут доступны через мешок атрибутов компонента. Если вы хотите присвоить переменной данных значение по умолчанию, вы можете указать имя переменной в качестве ключа массива и значение по умолчанию в качестве значения массива:
 </p>
 <code>
 <pre>
@@ -1202,8 +1186,8 @@ public function render()
 
 @ props(['type' => 'info', 'message'])
 
-< div {{ $attributes->merge(['class' => 'alert alert-'.$type]) }}>
-    {{ $message }}
+< div { { $attributes->merge(['class' => 'alert alert-'.$type]) }}>
+    { { $message }}
 </>
 </pre>
 </code>
@@ -1215,14 +1199,14 @@ public function render()
 </p>
 <code>
 <pre>
-    < x-dynamic-component :component="$componentName" class="mt-4" />
+    < x - dynamic-component :component="$componentName" class="mt-4" />
 </pre>
 </code>
 <h3 class="theme__subtitle">
     Включая подвиды
 </h3>
 <p class="theme__text">
-    Директива Blade @include позволяет вам включать представление Blade из другого представления. Все переменные, доступные для родительского представления, будут доступны для включенного представления:
+    Директива Blade @ include позволяет вам включать представление Blade из другого представления. Все переменные, доступные для родительского представления, будут доступны для включенного представления:
 </p>
 <code>
 <pre>
@@ -1244,7 +1228,7 @@ public function render()
 </pre>
 </code>
 <p class="theme__text">
-    Если вы попытаетесь @include несуществующего представления, Laravel выдаст ошибку. Если вы хотите включить представление, которое может присутствовать или отсутствовать, вы должны использовать директиву @includeIf:
+    Если вы попытаетесь @ include несуществующего представления, Laravel выдаст ошибку. Если вы хотите включить представление, которое может присутствовать или отсутствовать, вы должны использовать директиву @ includeIf:
 </p>
 <code>
 <pre>
@@ -1252,7 +1236,7 @@ public function render()
 </pre>
 </code>
 <p class="theme__text">
-    Если вы хотите @include представление, если данное логическое выражение имеет значение true, вы можете использовать директиву @includeWhen:
+    Если вы хотите @ include представление, если данное логическое выражение имеет значение true, вы можете использовать директиву @ includeWhen:
 </p>
 <code>
 <pre>
@@ -1260,7 +1244,7 @@ public function render()
 </pre>
 </code>
 <p class="theme__text">
-    Если вы хотите @include представления, если данное логическое выражение оценивается как false, вы можете использовать директиву @includeUnless:
+    Если вы хотите @ include представления, если данное логическое выражение оценивается как false, вы можете использовать директиву @ includeUnless:
 </p>
 <code>
 <pre>
@@ -1284,7 +1268,7 @@ public function render()
 </p>
 <code>
 <pre>
-    < input type="{{ $type ?? 'text' }}">
+    < input type="{ { $type ?? 'text' }}">
 </pre>
 </code>
 <p class="theme__text">
@@ -1308,56 +1292,820 @@ Blade::include('includes.input', 'input');
     Визуализация представлений для коллекций
 </h3>
 <p class="theme__text">
-    Вы можете комбинировать циклы и включать в одну строку с помощью директивы Blade @each:
+    Вы можете комбинировать циклы и включать в одну строку с помощью директивы Blade @ each:
 </p>
 <code>
 <pre>
-    @each('view.name', $jobs, 'job')
+    @ each('view.name', $jobs, 'job')
 </pre>
 </code>
 <p class="theme__text">
     Первый аргумент - это партиал представления для отображения для каждого элемента в массиве или коллекции. Второй аргумент - это массив или коллекция, которые вы хотите перебрать, а третий аргумент - это имя переменной, которая будет присвоена текущей итерации в представлении. Так, например, если вы выполняете итерацию по массиву jobs, обычно вам нужно получить доступ к каждому job как к переменной задания в вашем частичном представлении. Ключ для текущей итерации будет доступен в качестве key переменной в вашем партиале представления.
 
-Вы также можете передать четвертый аргумент директиве @each. Этот аргумент определяет представление, которое будет отображаться, если данный массив пуст.
+Вы также можете передать четвертый аргумент директиве @ each. Этот аргумент определяет представление, которое будет отображаться, если данный массив пуст.
 </p>
 <code>
 <pre>
-    @each('view.name', $jobs, 'job', 'view.empty')
+    @ each('view.name', $jobs, 'job', 'view.empty')
 </pre>
 </code>
 <p class="theme__text">
-    Представления, отображаемые через @each, не наследуют переменные родительского представления. Если дочернему представлению требуются эти переменные, вы должны вместо этого использовать @foreach и @include.
+    Представления, отображаемые через @ each, не наследуют переменные родительского представления. Если дочернему представлению требуются эти переменные, вы должны вместо этого использовать @ foreach и @ include.
 </p>
 <h3 class="theme__subtitle">
     Стеки
 </h3>
-<p class="theme__text"></p>
+<p class="theme__text">
+    Blade позволяет использовать именованные стеки, которые могут быть отрисованы где-нибудь ещё в другом шаблоне или макете. Это удобно в основном для указания любых JavaScript-библиотек, требуемых для ваших дочерних шаблонов:
+</p>
 <code>
 <pre>
+    @ push('scripts')
+    < script src="/example.js"></>
+    @ endpush
 </pre>
 </code>
-<p class="theme__text"></p>
+<p class="theme__text">
+    "Пушить" в стек можно сколько угодно раз. Для отрисовки всего содержимого стека передайте имя стека в директиву @ stack:
+</p>
 <code>
 <pre>
+    < head>
+        <!-- Head Contents -->
+
+        @ stack('scripts')
+    </>
 </pre>
 </code>
+<p class="theme__text">
+    Если вы хотите добавить контент в начало стека, вы должны использовать директиву @ prepend:
+</p>
+<code>
+<pre>
+    @ push('scripts')
+    This will be second...
+@ endpush
 
+// Later...
 
+@ prepend('scripts')
+    This will be first...
+@ endprepend
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    Внедрение сервисов
+</h3>
+<p class="theme__text">
+    Директива @ inject служит для извлечения сервиса из сервис-контейнера Laravel. Первый аргумент, передаваемый в @ inject, это имя переменной, в которую будет помещён сервис. А второй аргумент — имя класса или интерфейса сервиса, который вы хотите извлечь:
+</p>
+<code>
+<pre>
+    @ inject('metrics', 'App\Services\MetricsService')
+    < div>
+        Monthly Revenue: { { $metrics->monthlyRevenue() }}.
+    </>
+</pre>
+</code>
+<h3 class="theme__subtitle">Наследование Blade</h3>
+<p class="theme__text">
+    Blade позволяет вам определять даже свои собственные директивы с помощью метода directive. Когда компилятор Blade встречает пользовательскую директиву, он вызывает предоставленный обратный вызов с содержащимся в директиве выражением.
+Следующий пример создаёт директиву @ datetime($var), которая форматирует данный $var, который должен быть экземпляром DateTime:
+</p>
+<code>
+<pre>
+    namespace App\Providers;
 
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
 
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Blade::directive('datetime', function ($expression) {
+            return "< ?php echo ($expression)->format('m/d/Y H:i'); ?>";
+        });
+    }
+}
+</pre>
+</code>
+<p class="theme__text">
+    Как видите, мы привяжем метод format к любому выражению, переданному в директиву. Итак, в этом примере окончательный PHP, сгенерированный этой директивой, будет:
+</p>
+<code>
+<pre>
+    < ? php echo ($var)->format('m/d/Y H:i'); ?>
+</pre>
+</code>
+<p class="theme__text">
+    После обновления логики директивы Blade вам нужно будет удалить все кэшированные представления Blade. Кэшированные представления Blade можно удалить с помощью Artisan-команды view: clear.
+</p>
+<h3 class="theme__subtitle">Пользовательские If Statements</h3>
+<p class="theme__text">
+    Программирование настраиваемой директивы иногда бывает более сложным, чем необходимо при определении простых настраиваемых условных операторов. По этой причине Blade предоставляет метод Blade :: if, который позволяет быстро определять пользовательские условные директивы с помощью замыканий. Например, давайте определим настраиваемое условие, которое проверяет текущего поставщика облака приложений. Мы можем сделать это в методе boot нашего AppServiceProvider:
+</p>
+<code>
+<pre>
+    use Illuminate\Support\Facades\Blade;
+
+/**
+ * Bootstrap any application services.
+ *
+ * @return void
+ */
+public function boot()
+{
+    Blade::if('cloud', function ($provider) {
+        return config('filesystems.default') === $provider;
+    });
+}
+</pre>
+</code>
+<p class="theme__text">
+    Как только настраиваемое условное выражение определено, мы можем легко использовать его в наших шаблонах:
+</p>
+<code>
+<pre>
+    @ cloud('digitalocean')
+    // The application is using the digitalocean cloud provider...
+@ elsecloud('aws')
+    // The application is using the aws provider...
+@ else
+    // The application is not using the digitalocean or aws environment...
+@ endcloud
+
+@ unlesscloud('aws')
+    // The application is not using the aws environment...
+@ endcloud
+</pre>
+</code>
     </div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
-    <div class="theme"></div>
+    <div class="theme">
+        <h2 class="theme__title">
+            Локализация
+        </h2>
+        <p class="theme__text">
+            Возможности локализации Laravel предоставляют удобный способ получения строк на нескольких языках, что позволяет легко организовать поддержку мультиязычности вашим приложением. Языковые строки хранятся в файлах, располагающихся внутри директории resources/lang. В ней должны находиться подпапки для каждого языка, поддерживаемого вашим приложением:
+        </p>
+<code>
+<pre>
+    /resources
+    /lang
+        /en
+            messages.php
+        /es
+            messages.php
+</pre>
+</code>
+<p class="theme__text">
+    Все языковые файлы возвращают массив строк с ключами. Например:
+</p>
+<code>
+<pre>
+return [
+    'welcome' => 'Welcome to our application',
+];
+</pre>
+</code>
+<p class="theme__text">
+    Для языков, которые различаются по территории, вы должны назвать языковые каталоги в соответствии с ISO 15897. Например, для британского английского следует использовать «en_GB», а не «en-gb».
+</p>
+<h3 class="theme__subtitle">
+    Настройка локали
+</h3>
+<p class="theme__text">
+    Стандартный язык вашего приложения указан в конфиге config/app.php. Конечно же, вы можете изменить это значение на основе потребностей вашего приложения. Вы также можете изменить активный язык в процессе работы приложения с помощью метода setLocale фасада App:
+</p>
+<code>
+<pre>
+    Route::get('welcome/{locale}', function ($locale) {
+        if (! in_array($locale, ['en', 'es', 'fr'])) {
+            abort(400);
+        }
+
+        App::setLocale($locale);
+
+        //
+    });
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете настроить «запасной язык», который будет использоваться, когда активный язык не содержит заданной строки перевода. Как и язык по умолчанию, резервный язык также настраивается в файле конфигурации config / app.php:
+</p>
+<code>
+<pre>
+    'fallback_locale' => 'en',
+</pre>
+</code>
+<h3 class="theme__subtitle">Определение текущей локали</h3>
+<p class="theme__text">
+    Вы можете использовать методы getLocale и isLocale на фасаде App, чтобы определить текущий языковой стандарт или проверить, является ли языковой стандарт заданным значением:
+</p>
+<code>
+<pre>
+    $locale = App::getLocale();
+
+if (App::isLocale('en')) {
+    //
+}
+</pre>
+</code>
+<h3 class="theme__subtitle">Определение строк перевода</h3>
+<h4 class="theme_subtitlex2">Использование кратких ключей</h4>
+<p class="theme__text">
+    Обычно строки перевода хранятся в файлах в каталоге resources / lang. В этом каталоге должен быть подкаталог для каждого языка, поддерживаемого приложением:
+</p>
+<code>
+<pre>
+    /resources
+    /lang
+        /en
+            messages.php
+        /es
+            messages.php
+</pre>
+</code>
+<p class="theme__text">
+    Все языковые файлы возвращают массив строк с ключами. Например:
+</p>
+<code>
+<pre>
+    // resources/lang/en/messages.php
+
+return [
+    'welcome' => 'Welcome to our application',
+];
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Использование строк перевода как ключей</h4>
+<p class="theme__text">
+    Определение каждой строки с помощью "краткого ключа" для приложений с большими требованиями к переводу может привести к путанице при обращении к ним из ваших шаблонов. По этой причине, Laravel также предоставляет поддержку определения строк перевода с использованием стандартного перевода в качестве ключа.
+Файлы переводов, которые используют строки перевода в качестве ключей, хранятся в JSON-файлах в директории resources/lang. Например, если приложение имеет поддержку испанского языка, то вы должны создать файл resources/lang/es.json:
+</p>
+<code>
+<pre>
+    {
+        "I love programming.": "Me encanta programar."
+    }
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Получение строк перевода</h4>
+<p class="theme__text">Вы можете получать строки из языковых файлов с помощью функции __. Она принимает файл и ключ строки перевода в качестве первого параметра. Например, давайте получим строку перевода welcome из языкового файла resources/lang/messages.php:</p>
+<code>
+<pre>
+    echo __('messages.welcome');
+echo __('I love programming.');
+</pre>
+</code>
+<p class="theme__text">
+    Если вы используете шаблонизатор Blade, вы можете использовать синтаксис { {}} для вывода строки перевода или использовать директиву @ lang:
+</p>
+<code>
+<pre>
+{ { __('messages.welcome') }}
+
+@ lang('messages.welcome')
+</pre>
+</code>
+<p class="theme__text">
+    Если указанная строка перевода не существует, функция __ вернет ключ строки перевода. Итак, используя приведенный выше пример, функция __ вернет messages.welcome, если строка перевода не существует.
+Директива @ lang не выводит никаких сообщений. Вы несете полную ответственность за экранирование собственного вывода при использовании этой директивы.
+</p>
+<h4 class="theme_subtitlex2">Подстановка параметров в строках перевода</h4>
+<p class="theme__text">
+    При желании, вы можете указывать плейсхолдеры в ваших строках перевода. Все плейсхолдеры начинаются с символа :. Например, вы можете создать приветственное сообщение с плейсхолдером для имени:
+</p>
+<code>
+<pre>
+    'welcome' => 'Welcome, :name',
+</pre>
+</code>
+<p class="theme__text">
+    Для замены плейсхолдеров, при получении строки перевода, передайте массив с необходимыми заменами в качестве второго параметра функции __:
+</p>
+<code>
+<pre>
+    echo __('messages.welcome', ['name' => 'dayle']);
+</pre>
+</code>
+<p class="theme__text">
+    Если ваш плейсхолдер содержит только прописные буквы, или только первая его буква является прописной, то переведённое значение будет преобразовано соответствующим образом:
+</p>
+<code>
+<pre>
+    'welcome' => 'Welcome, :NAME', // Welcome, DAYLE
+'goodbye' => 'Goodbye, :Name', // Goodbye, Dayle
+</pre>
+</code>
+<h3 class="theme__subtitle">Плюрализация</h3>
+<p class="theme__text">
+    Плюрализация является комплексной проблемой, так как в разных языках существуют различные сложные правила плюрализации. С помощью символа "вертикальной черты" вы можете разграничить одиночную и множественную форму строки:
+</p>
+<code>
+<pre>
+    'apples' => 'There is one apple|There are many apples',
+</pre>
+</code>
+<p class="theme__text">
+    Вы даже можете создать сложные правила плюрализации, которые определят строки перевода для нескольких диапазонов чисел:
+</p>
+<code>
+<pre>
+    'apples' => '{0} There are none|[1,19] There are some|[20,*] There are many',
+</pre>
+</code>
+<p class="theme__text">
+    После определения строки перевода с вариантами плюрализации, вы можете использовать функцию trans_choice для получения строки для заданного "числа". В данном примере, так как число больше нуля и единицы, была возвращена форма множественного числа этой строки:
+</p>
+<code>
+<pre>
+    echo trans_choice('messages.apples', 10);
+</pre>
+</code>
+<p class="theme__text">
+    Вы также можете определить атрибуты заполнителя в строках множественного числа. Эти заполнители можно заменить, передав массив в качестве третьего аргумента функции trans_choice:
+</p>
+<code>
+<pre>
+    'minutes_ago' => '{1} :value minute ago|[2,*] :value minutes ago',
+
+echo trans_choice('time.minutes_ago', 5, ['value' => 5]);
+</pre>
+</code>
+<p class="theme__text">
+    Если вы хотите отобразить целочисленное значение, переданное в функцию trans_choice, вы можете использовать заполнитель: count:
+</p>
+<code>
+<pre>
+    'apples' => '{0} There are none|{1} There is one|[2,*] There are :count',
+</pre>
+</code>
+<h3 class="theme__subtitle">Переопределение языковых файлов пакета</h3>
+<p class="theme__text">
+    Некоторые пакеты могут поставляться со своими собственными языковыми файлами. Вместо изменения корневых файлов пакета для внесения изменений в языковые строки, вы можете переопределить их, поместив файлы в директорию resources/lang/vendor/{package}/{locale}.
+Таким образом, например, если вам необходимо переопределить перевод английских строк в файле messages.php пакета с названием skyrim/hearthfire, вам необходимо разместить языковой файл в: resources/lang/vendor/hearthfire/en/messages.php. Внутри этого файла вам следует указать только те строки, которые вы хотели бы переопределить. Все строки перевода, которые вы не переопределите, будут загружены из оригинальных языковых файлов пакета.
+</p>
+    </div>
+    <div class="theme">
+        <h3 class="theme__subtitle">
+            Сборка фронтенда
+        </h3>
+<p class="theme__text">
+    Laravel Mix - это чистый и гибкий API для определения инструкций сборки Webpack для вашего Laravel-приложения с использованием нескольких основных препроцессоров CSS и JavaScript. С помощью сцепки методов вы можете гибко определить свой конвейер сборки. Например:
+</p>
+<code>
+<pre>
+    mix.js('resources/js/app.js', 'public/js')
+    .sass('resources/sass/app.scss', 'public/css');
+</pre>
+</code>
+<p class="theme__text">
+    Если вы не знали, с какой стороны подойти к Webpack и вообще к сборке фронтенда, то вам точно понравится Laravel Mix. Но вам необязательно использовать именно его при разработке своего приложения. Вы можете использовать любой другой инструмент для сборки, или вообще не использовать его.
+</p>
+<h3 class="theme__subtitle">
+    Установка и настройка
+</h3>
+<h4 class="theme_subtitlex2">
+    Установка Node
+</h4>
+<p class="theme__text">
+    Перед запуском Mix вы должны сначала убедиться, что на вашем компьютере установлены Node.js и NPM.
+</p>
+<code>
+<pre>
+    node -v
+npm -v
+</pre>
+</code>
+<p class="theme__text">
+    вы можете легко установить последнюю версию Node и NPM с помощью простых графических установщиков со страницы загрузки.
+</p>
+<h4 class="theme_subtitlex2">Laravel Mix</h4>
+<p class="theme__text">
+    Последний оставшийся шаг - установить Laravel Mix. В свежей установке Laravel вы найдете файл package.json в корне вашей структуры директорий. Файл package.json по умолчанию включает все необходимое, чтобы начать. Подумайте об этом как о вашем файле composer.json, кроме того, что он определяет Node-зависимости вместо PHP. Вы можете установить зависимости, запустив:
+</p>
+<code>
+<pre>
+    npm install
+</pre>
+</code>
+<h3 class="theme__subtitle">Запуск Mix</h3>
+<p class="theme__text">
+    Mix - это слой настройки поверх Webpack, поэтому для запуска задач Mix вам нужно только выполнить один из NPM-скриптов, который включен в файл Laravel package.json по умолчанию:
+</p>
+<code>
+<pre>
+    // Run all Mix tasks...
+npm run dev
+
+// Run all Mix tasks and minify output...
+npm run production
+</pre>
+</code>
+<h3 class="theme__subtitle">Отслеживание изменений ассетов</h3>
+<p class="theme__text">
+    Команда npm run watch продолжит выполняться в терминале и будет следить за всеми изменениями ваших ресурсов. Когда что-либо изменится, автоматически скомпилируются новые файлы:
+</p>
+<code>
+<pre>
+    npm run watch
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете обнаружить, что в определенных средах Webpack не обновляется, когда меняются ваши файлы. Если это как раз то, с чем вы столкнулись, попробуйте использовать команлу watch-poll:
+</p>
+<code>
+<pre>
+    npm run watch-poll
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    Работа с таблицами стилей
+</h3>
+<p class="theme__text">
+    Файл webpack.mix.js - ваша точка входа для компиляции всех ассетов. Считайте его легкой оболочкой для настройки поверх Webpack. Задачи Mix можно связать вместе, чтобы конкретно указать как должны компилироваться ваши ассеты.
+</p>
+<h4 class="theme_subtitlex2">Less</h4>
+<p class="theme__text">
+    Метод less можно использовать для компилирования Less в CSS. Давайте скомпилируем наш первичный файл app.less в public/css/app.css.
+</p>
+<code>
+<pre>
+    mix.less('resources/assets/less/app.less', 'public/css');
+</pre>
+</code>
+<p class="theme__text">
+    Множественные вызовы метода less можно использовать для компилирования нескольких файлов:
+</p>
+<code>
+<pre>
+    mix.less('resources/assets/less/app.less', 'public/css')
+   .less('resources/assets/less/admin.less', 'public/css');
+</pre>
+</code>
+<p class="theme__text">
+    Если вы хотите изменить имя файла скомпилированного CSS, вы можете передать полный путь в качестве второго аргумента методу less:
+</p>
+<code>
+<pre>
+    mix.less('resources/assets/less/app.less', 'public/stylesheets/styles.css');
+</pre>
+</code>
+<p class="theme__text">
+    Если нужно переопределить лежащие в основе plug-in опции Less, то можно передать объект в качестве третьего аргумента mix.less():
+</p>
+<code>
+<pre>
+    mix.less('resources/assets/less/app.less', 'public/css', {
+        strictMath: true
+    });
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Sass</h4>
+<p class="theme__text">
+    Метод sass позволяет компилировать Sass в CSS. Вы можете использовать метод следующим образом:
+</p>
+<code>
+<pre>
+    mix.sass('resources/assets/sass/app.scss', 'public/css');
+</pre>
+</code>
+<p class="theme__text">
+    Как и в случае с методом less, вы можете компилировать несколько файлов Sass в их соответствующие CSS-файлы и даже настроить директорию вывода итогового CSS:
+</p>
+<code>
+<pre>
+    mix.sass('resources/assets/sass/app.sass', 'public/css')
+   .sass('resources/assets/sass/admin.sass', 'public/css/admin');
+</pre>
+</code>
+<p class="theme__text">
+    Дополнительные plug-in опции Node-Sass можно указать в качестве третьего аргумента:
+</p>
+<code>
+<pre>
+    mix.sass('resources/assets/sass/app.sass', 'public/css', {
+        precision: 5
+    });
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Stylus</h4>
+<p class="theme__text">
+    Схоже с Less и Sass, метод stylus позволяет компилировать Stylus в CSS:
+</p>
+<code>
+<pre>
+    mix.stylus('resources/assets/stylus/app.styl', 'public/css');
+</pre>
+</code>
+<p class="theme__text">
+    Вы также можете установить дополнительные плагины Stylus, такие как Rupture. Сначала установите требуемый плагин через NPM (npm install rupture) и затем затребуйте его в своем вызове mix.stylus():
+</p>
+<code>
+<pre>
+    mix.stylus('resources/assets/stylus/app.styl', 'public/css', {
+        use: [
+            require('rupture')()
+        ]
+    });
+</pre>
+</code>
+<h4 class="theme_subtitlex2">PostCSS</h4>
+<p class="theme__text">
+    PostCSS - мощный инструмент для трансформации CSS, который включен в Laravel Mix. По умолчанию Mix пользуется популярнм плагином Autoprefixer для автоматического применения всех необходимых вендор-префиксов CSS3. Вы свободно можете добавлять любые дополнительные плагины, которые подходят для вашего приложения. Сначала нужно установить желаемые плагины через NPM и затем обратиться к ним в вашем файле webpack.mix.js:
+</p>
+<code>
+<pre>
+    mix.sass('resources/assets/sass/app.scss', 'public/css')
+   .options({
+        postCss: [
+            require('postcss-css-variables')()
+        ]
+   });
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Простой CSS</h4>
+<p class="theme__text">
+    Если вам просто хотелось бы сконцентрировать некоторые простые таблицы стилей CSS в единый файл, то можно воспользоваться методом styles.
+</p>
+<code>
+<pre>
+    mix.styles([
+    'public/css/vendor/normalize.css',
+    'public/css/vendor/videojs.css'
+], 'public/css/all.css');
+</pre>
+</code>
+<h3 class="theme__subtitle">Обработка URL</h3>
+<p class="theme__text">
+    Так как Laravel Mix строится поверх Webpack, крайне важно понять некоторые концепты Webpack. Для компиляции CSS Webpack будет перезаписывать и оптимизировать любой вызов url() в рамках ваших таблицей стилей. Хотя это и может звучать странно, это невероятно мощный функционал. Представьте, что мы хотим скомпилировать Sass, который включает относительный URL, в изображение:
+</p>
+<code>
+<pre>
+    .example {
+        background: url('../images/example.png');
+    }
+</pre>
+</code>
+<p class="theme__text">
+    Абсолютные пути для любого заданного url() будут исключены из перезаписывания URL. Например, url('/images/thing.png') или url('http://example.com/images/thing.png') не будут изменены.
+По умолчанию Laravel Mix и Webpack найдут example.png, скопируют их в вашу папку public/images, а затем перезапишут url() в вашей сгенерированной таблице стилей. Таким образом, ваш скомпилированный CSS будет:
+</p>
+<code>
+<pre>
+    .example {
+        background: url(/images/example.png?d41d8cd98f00b204e9800998ecf8427e);
+      }
+</pre>
+</code>
+<p class="theme__text">
+    Хотя эта функция и полезна, возможно ваша существующая папка уже настроена так, как вам нравится. Если это именно ваш случай, можно отключить перезаписывание url():
+</p>
+<code>
+<pre>
+    mix.sass('resources/assets/app/app.scss', 'public/css')
+   .options({
+      processCssUrls: false
+   });
+</pre>
+</code>
+<p class="theme__text">
+    После добавления вышеуказанного в ваш файл webpack.mix.js, Mix больше не будет сопоставлять любой url() или копировать ассеты в вашу общую директорию. Другими словами, скомпилированный CSS будет выглядеть так же, как вы его и напечатали изначально:
+</p>
+<code>
+<pre>
+    .example {
+        background: url("../images/thing.png");
+    }
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Source Maps (файлы с информацией, которая требуется при отладке)</h4>
+<p class="theme__text">
+    Хотя они и отключены по умолчанию, source maps (файлы с информацией, которая требуется при отладке) можно активировать, вызвав метод mix.sourceMaps() в вашем файле webpack.mix.js. Хотя это и связано с ценой компиляции/производительности, это обеспечит дополнительную отладочную информацию инструментам разработчика вашего браузера при использовании скомпилированных ассетов.
+</p>
+<code>
+<pre>
+    mix.js('resources/assets/js/app.js', 'public/js')
+   .sourceMaps();
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Работа с JavaScript</h4>
+<p class="theme__text">
+    Mix предоставляет несколько функций для работы с JavaScript-файлами, например: компилирование ECMAScript 2015, бандлинг модулей, минификация и простая конкатенация простых JavaScript-файлов. Даже лучше: это все работает незаметно для пользователя, не требуя ни грамма пользовательской настройки:
+</p>
+<code>
+<pre>
+    mix.js('resources/assets/js/app.js', 'public/js');
+</pre>
+</code>
+<p class="theme__text">
+    Используя эту единственную строку кода теперь вы можете воспользоваться следующими плюсами:
+    • Синтаксис ES2015.
+    • Модули
+    • Компиляция файлов .vue.
+    • Минификация для продакшна.
+</p>
+<h4 class="theme_subtitlex2">
+    Извлечение библиотек поставщика
+</h4>
+<p class="theme__text">
+    Одним из потенциальных недостатков бандлинга всего JavaScript приложения с вашими библиотеками поставщиков является то, что это затрудняет долгосрочное кэширование. Например, одно обновление вашего кода приложения заставит браузер повторно загружать все ваши библиотеки поставщиков, даже если они не изменились.
+Если вы планируете часто обновлять JavaScript своего приложения, то вам следует рассмотреть вариант извлечение всех своих внешних библиотек в отдельный файл. Таким образом, изменение кода вашего приложения не повлияет на кеширование вашего большого файла vendor.js. Метод extract в Mix делает эту задачу чрезвычайно простой:
+</p>
+<code>
+<pre>
+    mix.js('resources/assets/js/app.js', 'public/js')
+   .extract(['vue'])
+</pre>
+</code>
+<p class="theme__text">
+    Метод extract принимает массив всех библиотек или модулей, которые вы бы хотели извлечь в файл vendor.js. Используя вышеуказанный сниппет в качестве примера, Mix сгенерирует следующие файлы:
+    • public/js/manifest.js: Webpack manifest runtime
+    • public/js/vendor.js: Ваши библиотеки поставщика
+    • public/js/app.js: Код вашего приложения
+Убедитесь, что загрузили эти файлы в соответствующем порядке, чтобы избежать ошибок JavaScript:
+</p>
+<code>
+<pre>
+    < script src="/js/manifest.js"></>
+    < script src="/js/vendor.js"></>
+    < script src="/js/app.js"></>
+</pre>
+</code>
+<h3 class="theme__subtitle">React</h3>
+<p class="theme__text">
+    Mix может автоматически установить Babel-плагины, необходимые для поддержки React. Для начала замените mix.js() на mix.react():
+</p>
+<code>
+<pre>
+    mix.react('resources/assets/js/app.jsx', 'public/js');
+</pre>
+</code>
+<p class="theme__text">
+    Mix в фоновом режиме скачает и включит подходящие Babel-плагины babel-preset-react.
+</p>
+<h3 class="theme__subtitle">Vanilla JS</h3>
+<p class="theme__text">
+    Схоже с комбинирование таблиц стилей с mix.styles(), вы также можете скомбинировать и минифицировать любое количество файлов JavaScript при помощи метода scripts():
+</p>
+<code>
+<pre>
+    mix.scripts([
+    'public/js/admin.js',
+    'public/js/dashboard.js'
+], 'public/js/all.js');
+</pre>
+</code>
+<p class="theme__text">
+    Эта опция особенно полезна для прежних версий проектов, где вам не требовалась компиляция Webpack для вашего JavaScript.
+Вариация mix.scripts() - mix.babel(). Сигнатура этого метода идентична scripts; однако, конкатенированный файл получит компиляцию Babel, которая переводит любой код ES2015 в vanilla JavaScript, который поймут все браузеры.
+</p>
+<h3 class="theme__subtitle">Пользовательская настройка Webpack</h3>
+<p class="theme__text">Laravel Mix обращается к преднастроенному файлу webpack.config.js. Время от времени вам может потребоваться вручную изменить этот файл. У вас, возможно, есть специальный лоадер или плагин, который нужно указывать, или может вы предпочитаете использовать Stylus вместо Sass. В таких случаях у вас будет два выбора:</p>
+<h4 class="theme_subtitlex2">Слияние пользовательской настройки</h4>
+<p class="theme__text">
+    Mix предоставляет полезный метод webpackConfig, который позволит выполнить слияение любых коротких Webpack-переопределений. Это крайне привлекательный выбор, так как от вас не требуется копировать и поддерживать собственную копию файла webpack.config.js. Метод webpackConfig принимает объект, который должен содержать любую специальную настройку Webpack, которую вы желаете применить.
+</p>
+<code>
+<pre>
+    mix.webpackConfig({
+        resolve: {
+            modules: [
+                path.resolve(__dirname, 'vendor/laravel/spark/resources/assets/js')
+            ]
+        }
+    });
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Пользовательские файлы настроек</h4>
+<p class="theme__text">
+    Скопируйте файл node_modules/laravel-mix/setup/webpack.config.js в корневую директорию вашего проекта, если вы бы хотели полностью изменить свою настройку Webpack. Затем укажите все ссылки --config в своем файле package.json на этот скопированный конфиг. Если вы решите воспользоваться этим подходом, любые будущие upstream-обновления webpack.config.js вашего Mix следует вручную склеивать с вашим измененным файлом.
+</p>
+<h3 class="theme__subtitle">Копирование файлов и директорий</h3>
+<p class="theme__text">
+    Метод copy используется для копирования файлов и папок в новое место. Это может пригодиться, когда нужно переместить определенный ассет из директории node_modules в вашу папку public.
+</p>
+<code>
+<pre>
+    mix.copy('node_modules/foo/bar.css', 'public/css/bar.css');
+</pre>
+</code>
+<p class="theme__text">
+    При копировании директории метод copy сделает структуру директории более плоской. Если нужно поддерживать оригинальную структуру директории, вместо этого следует использовать метод copyDirectory:
+</p>
+<code>
+<pre>
+    mix.copyDirectory('assets/img', 'public/img');
+</pre>
+</code>
+<h3 class="theme__subtitle">Версии файлов /очистка кэша</h3>
+<p class="theme__text">
+    Многие разработчики добавляют в имена ресурсов время создания или уникальный токен, чтобы браузер загружал свежие ресурсы вместо обработки устаревшего кода. В Mix для этого служит метод version.
+Метод version автоматически добавит уникальный хеш к именам всех скомпилированных файлов, что способствует более удобной очистке кэша:
+</p>
+<code>
+<pre>
+    mix.js('resources/assets/js/app.js', 'public/js')
+   .version();
+</pre>
+</code>
+<p class="theme__text">
+    Сгенерировав версию файла, вы можете использовать глобальную функцию Laravel PHP mix в ваших шаблонах для загрузки соответствующих хешированных ресурсов. Функция mix автоматически определит имя хешированного файла:
+</p>
+<code>
+<pre>
+    < link rel="stylesheet" href="{ { mix('/css/app.css') }}">
+</pre>
+</code>
+<p class="theme__text">
+    Так как во время разработки обычно нет необходимости в версионированных файлах, вы можете указать, чтобы процесс версионировання запускался только во время npm run production:
+</p>
+<code>
+<pre>
+    mix.js('resources/assets/js/app.js', 'public/js');
+
+if (mix.inProduction()) {
+    mix.version();
+}
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Пользовательские базовые URL-адреса Mix</h4>
+<p class="theme__text">
+    Если ваши скомпилированные ресурсы Mix развернуты в CDN отдельно от вашего приложения, вам нужно будет изменить базовый URL-адрес, сгенерированный функцией mix. Вы можете сделать это, добавив параметр конфигурации mix_url в файл конфигурации config / app.php:
+</p>
+<code>
+<pre>
+    'mix_url' => env('MIX_ASSET_URL', null)
+</pre>
+</code>
+<p class="theme__text">
+    После настройки URL-адреса Mix функция Mix будет префиксом настроенного URL-адреса при создании URL-адресов для ресурсов:
+https://cdn.example.com/js/app.js?id=1964becbdd96414518cd
+</p>
+<h3 class="theme__subtitle">Перезагрузка Browsersync</h3>
+<p class="theme__text">
+    BrowserSync автоматически производит обновление в браузере при изменениях в ваших ресурсах. Вы можете использовать метод mix.browserSync():
+</p>
+<code>
+<pre>
+    mix.browserSync('my-domain.dev');
+
+// Or...
+
+// https://browsersync.io/docs/options
+mix.browserSync({
+    proxy: 'my-domain.dev'
+});
+</pre>
+</code>
+<p class="theme__text">
+    Этому методу можно передавать либо строку (прокси), либо объект (настройки BrowserSync). Затем запустите дев-сервер Webpack, используя команду npm run watch. Теперь, когда вы изменяете скрипт или файл PHP, смотрите как браузер сразу же обновляет страницу, чтобы отразить внесенные изменения.
+</p>
+<h3 class="theme__subtitle">
+    Переменные среды
+</h3>
+<p class="theme__text">
+    Вы можете внедрите переменные среды в Mix, укахав префикс MIX_ ключу в вашем файле .env:
+</p>
+<code>
+<pre>
+    MIX_SENTRY_DSN_PUBLIC=http://example.com
+</pre>
+</code>
+<p class="theme__text">
+    После того как переменная была задана в вашем файле .env, вы можете получить доступ через объект process.env. Если значение меняет во время выполнения задачи watch, вам потребуется перезапустить задачу:
+</p>
+<code>
+<pre>
+    process.env.MIX_SENTRY_DSN_PUBLIC
+</pre>
+</code>
+<h3 class="theme__subtitle">Уведомления</h3>
+<p class="theme__text">
+    Когда доступно, Mix будет автоматически отображать уведомления ОС для каждого бандла. Это даст вам мгновенную обратную связь о том, была ли компиляция успешной или нет. Однако, иногда может потребоваться отключить эти уведомления. Одним из таких примеров может быть запуск Mix на вашем продакшн-сервере. Уведомления можно отключить через метод disableNotifications.
+</p>
+<code>
+<pre>
+    mix.disableNotifications();
+</pre>
+</code>
+    </div>
 </div>
 @endsection
 
@@ -1366,17 +2114,8 @@ Blade::include('includes.input', 'input');
 
 
 
-<h1 class="themes__title"></h1>
-<h2 class="theme__title"></h2>
-<h3 class="theme__subtitle"></h3>
-<h4 class="theme_subtitlex2"></h4>
-<p class="theme__text"></p>
-<code>
-<pre>
-</pre>
-</code>
-<p class="theme__text"></p>
-<code>
-<pre>
-</pre>
-</code>
+{{--
+
+
+
+--}}

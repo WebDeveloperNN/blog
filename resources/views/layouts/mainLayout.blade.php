@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <body>
+
     <div class="content-wrapper">
         <x-menu/>
         <div class="content">

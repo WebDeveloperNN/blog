@@ -123,6 +123,10 @@ main page */
     padding-bottom: 5px;
 }
 
+.themes {
+    overflow: hidden;
+}
+
 .theme__subtitle {
     color: #c6f1ff;
     line-height: 1.3;

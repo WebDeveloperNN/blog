@@ -18,26 +18,36 @@ use App\Http\Controllers\AuthorizationController;
 use App\Http\Controllers\PostController;
 use App\Models\Technology;
 
-
-
 Route::get('/login', [AuthorizationController::class, 'index']);
 
-// Route::get('/', function() {
+// =============================================================================================================
+// ====================================Laravel section start====================================================
+// =============================================================================================================
+// Prologue + Getting Started
+Route::get('/laravel/prologue', function() {
+    return view('laravel.prologue.index');
+});
+// Architecture Concepts
+// The Basics
+// Frontend
+// Security
+// Digging Deeper
+// Database
+// Eloquent ORM
+// Testing
+// Packages
+// API Documentation
+Route::redirect('/laravel/api', url('https://laravel.com/api/8.x/'), 301);
+// =============================================================================================================
+// =====================================Laravel section end=====================================================
+// =============================================================================================================
 
-//     return view('mainPage');
-// });
 
-// Route::get('/laravel/prologue/', function() {
-//     return view('posts.laravel.prologue.prologue');
-// });
 
-Route::get('/artem', function() {
-    return view('artem');
+Route::get('/laravel/database', function() {
+    return view('laravel.database.index');
 });
 
-Route::get('/laravel/first_meeting/prologue', function() {
-    return view('laravel.first_meeting.prologue');
-});
 
 Route::get('/laravel/architecture', function() {
     return view('laravel.architecture.index');
@@ -47,12 +57,17 @@ Route::get('/laravel/basic', function() {
     return view('laravel.basic.index');
 });
 
-Route::get('/laravel/fronted', function() {
+Route::get('/laravel/frontend', function() {
     return view('laravel.frontend.index');
 });
 
-Route::get('/{technology}/{chapter}/{theme}', [PostController::class, 'show']);
-Route::get('/{technology}', function() {return 'menu';});
+Route::get('/laravel/security', function() {
+    return view('laravel.security.index');
+});
+
+
+// Route::get('/{technology}/{chapter}/{theme}', [PostController::class, 'show']);
+// Route::get('/{technology}', function() {return 'menu';});
 
 
 
@@ -79,3 +94,17 @@ Route::get('/{technology}', function() {return 'menu';});
 //     $test = Theme::join('technologies', 'technology', '=', 'technologies.id')->join('chapters', 'chapter', '=', 'chapters.id')->get();
 //     return $test;
 // });
+
+// В чем смысл сайта, который я делаю:
+// 1) Информация в сжатом виде
+// 2) На языке, который я понимаю
+// 3) Хорошая навигация
+
+// Также нужно написать план
+// 1) Laravel
+// 2) Базы данных / SQL
+// 3) Git
+// 4) Компьютерные сети
+// 5) Линукс
+// 6) Хакинг
+// 7) C++

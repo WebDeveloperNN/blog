@@ -1,4 +1,5 @@
 @extends('layouts.mainLayout')
+
 @section('content')
 <div class="themes">
     <h1 class="themes__title">Архитектура</h1>
@@ -542,98 +543,6 @@ class RiakServiceProvider extends ServiceProvider
         <p class="theme__text">
             Этот сервис-провайдер только определяет метод register и использует его, чтобы определить реализацию Riak \ Connection в сервис-контейнере.
         </p>
-
-
-
-
-
-
-
-
-
-        <h3 class="theme__subtitle">
-            The bindings And singletons Properties
-        </h3>
-        <p class="theme__text">
-            Если ваш поставщик услуг регистрирует много простых привязок, вы можете использовать свойства bindings и singletons вместо того, чтобы вручную регистрировать каждую привязку контейнера. Когда поставщик услуг загружается платформой, он автоматически проверяет эти свойства и регистрирует их привязки:
-        </p>
-<code>
-<pre>
-namespace App\Providers;
-
-use App\Contracts\DowntimeNotifier;
-use App\Contracts\ServerProvider;
-use App\Services\DigitalOceanServerProvider;
-use App\Services\PingdomDowntimeNotifier;
-use App\Services\ServerToolsProvider;
-use Illuminate\Support\ServiceProvider;
-
-class AppServiceProvider extends ServiceProvider
-{
-    public $bindings = [
-        ServerProvider::class => DigitalOceanServerProvider::class,
-    ];
-
-    public $singletons = [
-        DowntimeNotifier::class => PingdomDowntimeNotifier::class,
-        ServerProvider::class => ServerToolsProvider::class,
-    ];
-}
-</pre>
-</code>
-
-<h3 class="theme__subtitle">
-    Отложенные сервис-провайдеры
-</h3>
-<p class="theme__text">
-    Если ваш провайдер только регистрирует привязки в сервис-контейнере, то можно отложить регистрацию до момента, когда одна из этих привязок будет запрошена из сервис-контейнера. Это позволит не тревожить файловую систему при каждом запросе, что увеличит производительность вашего приложения.
- 
-    Laravel компилирует и хранит список всех сервисов, предоставляемых отложенными сервис-провайдерами, и их классов. Laravel загрузит нужный сервис-провайдер только когда в процессе работы приложению понадобится один из этих сервисов.
-     
-    Для того, чтобы сделать сервис-провайдер отложенным, установите свойство defer равным true и определите метод providers. Метод providers должен вернуть привязки сервис-контейнера, зарегистрированные в вашем провайдере:
-</p>
-<code>
-<pre>
-    namespace App\Providers;
-
-    use Riak\Connection;
-    use Illuminate\Support\ServiceProvider;
-
-    class RiakServiceProvider extends ServiceProvider
-    {
-        /**
-         * Задаёт отложена ли загрузка провайдера.
-         *
-         * @var bool
-         */
-        protected $defer = true;
-
-        /**
-         * Регистрация сервис-провайдера.
-         *
-         * @return void
-         */
-        public function register()
-        {
-            $this->app->singleton(Connection::class, function ($app) {
-                return new Connection($app['config']['riak']);
-            });
-        }
-
-        /**
-         * Получить предоставляемые сервисы от провайдера.
-         *
-         * @return array
-         */
-        public function provides()
-        {
-            return [Connection::class];
-        }
-
-    }
-
-</pre>
-</code>
 <h3 class="theme__subtitle">
     Связывание
     </h3>
@@ -860,6 +769,95 @@ class AppServiceProvider extends ServiceProvider
     });
     </pre>
     </code>
+
+
+    <h3 class="theme__subtitle">
+        The bindings And singletons Properties
+    </h3>
+    <p class="theme__text">
+        Если ваш поставщик услуг регистрирует много простых привязок, вы можете использовать свойства bindings и singletons вместо того, чтобы вручную регистрировать каждую привязку контейнера. Когда поставщик услуг загружается платформой, он автоматически проверяет эти свойства и регистрирует их привязки:
+    </p>
+<code>
+<pre>
+namespace App\Providers;
+
+use App\Contracts\DowntimeNotifier;
+use App\Contracts\ServerProvider;
+use App\Services\DigitalOceanServerProvider;
+use App\Services\PingdomDowntimeNotifier;
+use App\Services\ServerToolsProvider;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+public $bindings = [
+    ServerProvider::class => DigitalOceanServerProvider::class,
+];
+
+public $singletons = [
+    DowntimeNotifier::class => PingdomDowntimeNotifier::class,
+    ServerProvider::class => ServerToolsProvider::class,
+];
+}
+</pre>
+</code>
+
+<h3 class="theme__subtitle">
+Отложенные сервис-провайдеры
+</h3>
+<p class="theme__text">
+Если ваш провайдер только регистрирует привязки в сервис-контейнере, то можно отложить регистрацию до момента, когда одна из этих привязок будет запрошена из сервис-контейнера. Это позволит не тревожить файловую систему при каждом запросе, что увеличит производительность вашего приложения.
+ 
+Laravel компилирует и хранит список всех сервисов, предоставляемых отложенными сервис-провайдерами, и их классов. Laravel загрузит нужный сервис-провайдер только когда в процессе работы приложению понадобится один из этих сервисов.
+ 
+Для того, чтобы сделать сервис-провайдер отложенным, установите свойство defer равным true и определите метод providers. Метод providers должен вернуть привязки сервис-контейнера, зарегистрированные в вашем провайдере:
+</p>
+<code>
+<pre>
+namespace App\Providers;
+
+use Riak\Connection;
+use Illuminate\Support\ServiceProvider;
+
+class RiakServiceProvider extends ServiceProvider
+{
+    /**
+     * Задаёт отложена ли загрузка провайдера.
+     *
+     * @var bool
+     */
+    protected $defer = true;
+
+    /**
+     * Регистрация сервис-провайдера.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->singleton(Connection::class, function ($app) {
+            return new Connection($app['config']['riak']);
+        });
+    }
+
+    /**
+     * Получить предоставляемые сервисы от провайдера.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return [Connection::class];
+    }
+
+}
+
+</pre>
+</code>
+
+
+
+
     <h3 class="theme__subtitle">
     Применение на практике
     </h3>
@@ -1488,232 +1486,12 @@ class CacheOrderInformation
     </tr>
 </table>
 </p>
-
-
-
-
-
-
-
 </div>
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------
-<div class="themes">
-    <div class="theme">
-    </div>
-</div>
------------------------------
-<h1 class="themes__title">
-
-</h1>
-<h2 class="theme__title">
-
-</h2>
-<h3 class="theme__subtitle">
-
-</h3>
-<h4 class="theme_subtitlex2">
-
-</h4>
-<p class="theme__text">
-
-</p>
-<code>
-<pre>
-
-</pre>
-</code>
-
-
-
-
-
-
-
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-    <div class="theme">
-
-    </div>
-</.div>
 
 
 
