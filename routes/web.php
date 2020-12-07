@@ -112,6 +112,20 @@ Route::get('/laravel/security', function() {
 // 6) Хакинг
 // 7) C++
 
+// Надо написать план изучения с какими-то чекпоинтами. Плюс это все должно идти в инфо блок и портфолио. Например:
+// 1) Laravel (теория+тест)
+// 2) 10 сайтов на laravel
+// 3) инфоблок на laravel
+// 4) сайт-вебстудии на laravel
+// 5) сайт-портфолио на laravel
+// 6) JS
+// 7) HTML5+CSS3
+// 8) Sass, Less, Stylys
+// 9) webpack
+// 10) git
+// 11) сети
+// 12) c++
+
 
 
 //  https://refactoring.guru/ru/design-patterns/composite

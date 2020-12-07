@@ -5374,24 +5374,4660 @@ $time = Storage::lastModified('file1.jpg');
 
 
 Запись файлов
+Для записи файла на диск служит метод put(). Также вы можете передать в метод put() PHP-resource, чтобы использовать низкоуровневую поддержку потоков Flysystem. Очень рекомендуем использовать потоки при работе с большими файлами:
+
+use Illuminate\Support\Facades\Storage;
+
+Storage::put('file.jpg', $contents);
+
+Storage::put('file.jpg', $resource);
+
++ 5.3
+
+добавлено в 5.3 (28.01.2017)
+
+Автоматическая работа с потоками
+
+Если вы хотите, чтобы Laravel автоматически использовал потоки для записи файла в хранилище, используйте методы putFile() или putFileAs(). Эти методы принимают объект Illuminate\Http\File или Illuminate\Http\UploadedFile, и автоматически используют потоки для размещения файла в необходимом месте:
+
+use Illuminate\Http\File;
+
+// Автоматическое генерирование UUID для имени файла...
+Storage::putFile('photos', new File('/path/to/photo'));
+
+// Ручное указание имени файла...
+Storage::putFileAs('photos', new File('/path/to/photo'), 'photo.jpg');
+
+У метода putFile() есть несколько важных нюансов. Заметьте, мы указали только название каталога без имени файла. По умолчанию метод putFile() генерирует UUID в качестве имени файла. Метод вернёт путь к файлу, поэтому вы можете сохранить в БД весь путь, включая сгенерированное имя.
+
+Методы putFile() и putFileAs() принимают также аргумент «видимости» сохраняемого файла. Это полезно в основном при хранении файлов в облачном хранилище, таком как S3, когда необходим общий доступ к файлам:
+
+Storage::putFile('photos', new File('/path/to/photo'), 'public');
+
+Добавление контента в начало / конец файла
+
+Для вставки контента в начало или конец файла служат методы prepend() и append():
+
+Storage::prepend('file.log', 'Prepended Text');
+
+Storage::append('file.log', 'Appended Text');
+
+Копирование и перемещение файлов
+
+Метод copy() используется для копирования существующего файла в новое расположение на диске, а метод move() — для переименования или перемещения существующего файла в новое расположение:
+
+Storage::copy('old/file1.jpg', 'new/file1.jpg');
+
+Storage::move('old/file1.jpg', 'new/file1.jpg');
+
+
+
+Загрузка файлов
+Загрузка файлов в веб-приложениях — это чаще всего загрузка пользовательских файлов, таких как аватар, фотографии и документы. В Laravel очень просто сохранять загружаемые файлы методом store() на экземпляре загружаемого файла. Просто вызовите метод store(), указав путь для сохранения загружаемого файла:
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class UserAvatarController extends Controller
+{
+    /**
+     * Update the avatar for the user.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function update(Request $request)
+    {
+        $path = $request->file('avatar')->store('avatars');
+
+        return $path;
+    }
+}
+В этом примере есть несколько важных моментов. Заметьте, мы указали только название каталога без имени файла. По умолчанию метод store() генерирует UUID в качестве имени файла. Метод вернёт путь к файлу, поэтому вы можете сохранить в БД весь путь, включая сгенерированное имя.
+
+Также вы можете вызвать метод putFile() фасада Storage для выполнения этой же операции над файлом, как показано в примере:
+
+$path = Storage::putFile('avatars', $request->file('avatar'));
+
+Указание имени файла
+
+Если вы не хотите, чтобы файлу автоматически было назначено имя, можете использовать метод storeAs(), который принимает в виде аргументов путь, имя файла, и (необязательно) диск:
+
+$path = $request->file('avatar')->storeAs(
+  'avatars', $request->user()->id
+);
+
+Конечно, вы также можете использовать метод putFileAs() фасада Storage, который выполняет такую же операцию:
+
+$path = Storage::putFileAs(
+  'avatars', $request->file('avatar'), $request->user()->id
+);
+Непечатаемые и недопустимые символы Unicode будут автоматически удалены из путей к файлам. Следовательно, вы можете очистить пути к файлам перед их передачей в методы хранения файлов Laravel. Пути к файлам нормализуются с помощью метода League \ Flysystem \ Util :: normalizePath.
+
+
+
+Указание диска
+Указание диска
+
+По умолчанию этот метод использует диск по умолчанию. Если необходимо указать другой диск, передайте имя диска в качестве второго аргумента в метод store():
+PHP
+
+$path = $request->file('avatar')->store(
+  'avatars/'.$request->user()->id, 's3'
+);
+Если вы используете метод storeAs, вы можете передать имя диска в качестве третьего аргумента метода:
+path = $request->file('avatar')->storeAs(
+    'avatars',
+    $request->user()->id,
+    's3'
+);
+Другая информация о файле
+
+Если вы хотите получить оригинальное имя загруженного файла, вы можете сделать это с помощью метода getClientOriginalName:
+$name = $request->file('avatar')->getClientOriginalName();
+Метод extension может использоваться для получения расширения загруженного файла:
+$extension = $request->file('avatar')->extension();
+
+Видимость файлов
+
+В интеграции Flysystem в Laravel «видимость» — это абстракция разрешений на файлы для использования на нескольких платформах. Файлы могут быть обозначены как public или private. Если файл отмечен как public, значит он должен быть доступен остальным. Например, при использовании драйвера S3 вы можете получить URL для public-файлов.
+
+Вы можете задать видимость при размещении файла методом put():
+
+use Illuminate\Support\Facades\Storage;
+
+Storage::put('file.jpg', $contents, 'public');
+
+Если файл уже был сохранён, то получить и задать его видимость можно методами getVisibility() и setVisibility():
+
+$visibility = Storage::getVisibility('file.jpg');
+
+Storage::setVisibility('file.jpg', 'public')
+При взаимодействии с загруженными файлами вы можете использовать методы storePublicly и storePubliclyAs для сохранения загруженного файла в открытом доступе:
+$path = $request->file('avatar')->storePublicly('avatars', 's3');
+
+$path = $request->file('avatar')->storePubliclyAs(
+    'avatars',
+    $request->user()->id,
+    's3'
+);
+Удаление файлов
+
+Метод delete() принимает имя одного файла или массив файлов для удаления с диска:
+
+use Illuminate\Support\Facades\Storage;
+
+Storage::delete('file.jpg');
+
+Storage::delete(['file1.jpg', 'file2.jpg']);
+
+
+При необходимости вы можете указать диск, с которого следует удалить файл:
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('s3')->delete('folder_path/file_name.jpg');
+
+Папки
+
+Получение всех файлов из папки
+
+Метод files() возвращает массив всех файлов из указанной папки. Если вы хотите получить массив всех файлов папки и её подпапок, используйте метод allFiles():
+
+use Illuminate\Support\Facades\Storage;
+
+$files = Storage::files($directory);
+
+$files = Storage::allFiles($directory);
+
+Получение всех подпапок
+
+Метод directories() возвращает массив всех папок из указанной папки. Вдобавок, вы можете использовать метод allDirectories() для получения списка всех папок в данной папке и во всех её подпапках:
+
+$directories = Storage::directories($directory);
+
+// рекурсивно...
+$directories = Storage::allDirectories($directory);
+
+Создание папки
+
+Метод makeDirectory() создаёт указанную папку, включая необходимые подпапки:
+
+Storage::makeDirectory($directory);
+
+Удаление директории
+
+И наконец, метод deleteDirectory() удаляет папку и все её файлы с диска:
+
+Storage::deleteDirectory($directory);
+
+Пользовательские файловые системы
+Laravel Flysystem предоставляет драйверы для нескольких «drivers» из коробки. Однако, Flysystem не ограничен ими и содержит в себе адаптеры для многих других систем хранения. Вы можете создать свой драйвер, если хотите использовать один из этих дополнительных адаптеров в вашем приложении Laravel.
+Для настройки собственной файловой системы вам понадобится адаптер Flysystem. Давайте добавим в наш проект адаптер Dropbox, поддерживаемый сообществом:
+composer require spatie/flysystem-dropbox
+
+Затем вы должны создать  service provide, например DropboxServiceProvider. В методе boot поставщика вы можете использовать метод extend фасада Storage для определения настраиваемого драйвера:
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\ServiceProvider;
+use League\Flysystem\Filesystem;
+use Spatie\Dropbox\Client as DropboxClient;
+use Spatie\FlysystemDropbox\DropboxAdapter;
+
+class DropboxServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Storage::extend('dropbox', function ($app, $config) {
+            $client = new DropboxClient(
+                $config['authorization_token']
+            );
+
+            return new Filesystem(new DropboxAdapter($client));
+        });
+    }
+}
+Первый аргумент метода extend() — имя драйвера, второй — замыкание, которое получает переменные $app и $config. Замыкание должно возвратить экземпляр League\Flysystem\Filesystem. Переменная $config содержит значения, определенные в config/filesystems.php для указанного диска.
+
+Затем зарегистрируйте поставщика услуг в файле конфигурации config / app.php:
+'providers' => [
+    // ...
+    App\Providers\DropboxServiceProvider::class,
+];
+
+Когда вы создали сервис-провайдер для регистрации расширения, вы можете использовать драйвер dropbox в своём файле с настройками config/filesystems.php.
+    </div>
+    <div class="theme">
+<h2 class="theme__title">
+    Помошники
+</h2>
+Laravel включает множество глобальных «вспомогательных» функций PHP. Многие из этих функций используются самим фреймворком; однако вы можете использовать их в своих собственных приложениях, если сочтете их удобными.
+
+
+Список методов
+Массивы и объекты
+Arr::accessible()
+Метод Arr :: available проверяет, доступно ли данное значение массиву:
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+
+$isAccessible = Arr::accessible(['a' => 1, 'b' => 2]);
+
+// true
+
+$isAccessible = Arr::accessible(new Collection);
+
+// true
+
+$isAccessible = Arr::accessible('abc');
+
+// false
+
+$isAccessible = Arr::accessible(new stdClass);
+
+// false
+
+Arr::add()
+Добавить указанную пару ключ/значение в массив, если она там ещё не существует или установить значение null.
+use Illuminate\Support\Arr;
+
+$array = Arr::add(['name' => 'Desk'], 'price', 100);
+
+// ['name' => 'Desk', 'price' => 100]
+
+$array = Arr::add(['name' => 'Desk', 'price' => null], 'price', 100);
+
+// ['name' => 'Desk', 'price' => 100]
+
+Arr::collapse()
+Функция array_collapse() (Laravel 5.1+) собирает массив массивов в единый массив:
+use Illuminate\Support\Arr;
+$array = Arr::collapse([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+// [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+Arr::crossJoin()
+Метод Arr :: crossJoin cross объединяет указанные массивы, возвращая декартово произведение со всеми возможными перестановками:
+use Illuminate\Support\Arr;
+
+$matrix = Arr::crossJoin([1, 2], ['a', 'b']);
+
+/*
+    [
+        [1, 'a'],
+        [1, 'b'],
+        [2, 'a'],
+        [2, 'b'],
+    ]
+*/
+
+$matrix = Arr::crossJoin([1, 2], ['a', 'b'], ['I', 'II']);
+
+/*
+    [
+        [1, 'a', 'I'],
+        [1, 'a', 'II'],
+        [1, 'b', 'I'],
+        [1, 'b', 'II'],
+        [2, 'a', 'I'],
+        [2, 'a', 'II'],
+        [2, 'b', 'I'],
+        [2, 'b', 'II'],
+    ]
+*/
+
+Arr::divide()
+Вернуть два массива — один с ключами, другой со значениями оригинального массива.
+use Illuminate\Support\Arr;
+
+[$keys, $values] = Arr::divide(['name' => 'Desk']);
+
+// $keys: ['name']
+
+// $values: ['Desk']
+
+Arr::dot()
+Сделать многоуровневый массив плоским, объединяя вложенные массивы с помощью точки в именах.
+use Illuminate\Support\Arr;
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+$flattened = Arr::dot($array);
+
+// ['products.desk.price' => 100]
+
+Arr::except()
+Удалить указанную пару ключ/значение из массива.
+use Illuminate\Support\Arr;
+$array = ['name' => 'Desk', 'price' => 100];
+$filtered = Arr::except($array, ['price']);
+// ['name' => 'Desk']
+
+Arr::exists()
+Метод Arr :: exists проверяет, существует ли данный ключ в предоставленном массиве:
+use Illuminate\Support\Arr;
+$array = ['name' => 'John Doe', 'age' => 17];
+$exists = Arr::exists($array, 'name');
+// true
+$exists = Arr::exists($array, 'salary');
+// false
+
+Arr::first()
+Вернуть первый элемент массива, удовлетворяющий требуемому условию.
+use Illuminate\Support\Arr;
+$array = [100, 200, 300];
+$first = Arr::first($array, function ($value, $key) {
+    return $value >= 150;
+});
+// 200
+Третьим параметром можно передать значение по умолчанию на случай, если ни одно значение не пройдёт условие:
+use Illuminate\Support\Arr;
+$first = Arr::first($array, $callback, $default);
+
+Arr::flatten()
+Сделать многоуровневый массив плоским.
+use Illuminate\Support\Arr;
+
+$array = ['name' => 'Joe', 'languages' => ['PHP', 'Ruby']];
+
+$flattened = Arr::flatten($array);
+
+// ['Joe', 'PHP', 'Ruby']
+
+
+Arr::forget()
+Удалить указанную пару ключ/значение из многоуровневого массива, используя синтаксис имени с точкой.
+use Illuminate\Support\Arr;
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+Arr::forget($array, 'products.desk');
+
+// ['products' => []]
+
+
+Arr::get()
+Вернуть значение из многоуровневого массива, используя синтаксис имени с точкой.
+use Illuminate\Support\Arr;
+$array = ['products' => ['desk' => ['price' => 100]]];
+$price = Arr::get($array, 'products.desk.price');
+// 100
+Также третьим аргументом можно передать значение по умолчанию на случай, если указанный ключ не будет найден:
+use Illuminate\Support\Arr;
+$discount = Arr::get($array, 'products.desk.discount', 0);
+// 0
+
+Arr::has()
+Функция array_has() проверяет существование данного элемента или элементов в массиве с помощью «точечной» записи:
+use Illuminate\Support\Arr;
+$array = ['product' => ['name' => 'Desk', 'price' => 100]];
+$contains = Arr::has($array, 'product.name');
+// true
+$contains = Arr::has($array, ['product.price', 'product.discount']);
+// false
+
+Arr::hasAny()
+Метод Arr :: hasAny проверяет, существует ли какой-либо элемент в данном наборе в массиве, используя "точечную" нотацию:
+use Illuminate\Support\Arr;
+
+$array = ['product' => ['name' => 'Desk', 'price' => 100]];
+
+$contains = Arr::hasAny($array, 'product.name');
+
+// true
+
+$contains = Arr::hasAny($array, ['product.name', 'product.discount']);
+
+// true
+
+$contains = Arr::hasAny($array, ['category', 'product.discount']);
+
+// false
+
+Arr::isAssoc()
+176 / 5000
+Результаты перевода
+Arr :: isAssoc возвращает true, если данный массив является ассоциативным массивом. Массив считается ассоциативным, если в нем нет последовательных цифровых ключей, начинающихся с нуля:
+use Illuminate\Support\Arr;
+
+$isAssoc = Arr::isAssoc(['product' => ['name' => 'Desk', 'price' => 100]]);
+
+// true
+
+$isAssoc = Arr::isAssoc([1, 2, 3]);
+
+// false
+
+Arr::last()
+Функция array_last() возвращает последний элемент массива, удовлетворяющий требуемому условию:
+use Illuminate\Support\Arr;
+$array = [100, 200, 300, 110];
+$last = Arr::last($array, function ($value, $key) {
+    return $value >= 150;
+});
+// 300
+Третьим параметром можно передать значение по умолчанию. Это значение будет возвращено если никакое значение не пройдет тест на правду.
+use Illuminate\Support\Arr;
+$last = Arr::last($array, $callback, $default);
+
+Arr::only()
+Вернуть из массива только указанные пары ключ/значения.
+use Illuminate\Support\Arr;
+
+$array = ['name' => 'Desk', 'price' => 100, 'orders' => 10];
+
+$slice = Arr::only($array, ['name', 'price']);
+
+// ['name' => 'Desk', 'price' => 100]
+
+Arr::pluck()
+Извлечь значения из многоуровневого массива, соответствующие переданному ключу.
+use Illuminate\Support\Arr;
+$array = [
+    ['developer' => ['id' => 1, 'name' => 'Taylor']],
+    ['developer' => ['id' => 2, 'name' => 'Abigail']],
+];
+
+$names = Arr::pluck($array, 'developer.name');
+// ['Taylor', 'Abigail']
+Также вы можете указать ключ для полученного списка:
+use Illuminate\Support\Arr;
+$names = Arr::pluck($array, 'developer.name', 'developer.id');
+// [1 => 'Taylor', 2 => 'Abigail']
+
+Arr::prepend()
+Поместить элемент в начало массива:
+use Illuminate\Support\Arr;
+$array = ['one', 'two', 'three', 'four'];
+$array = Arr::prepend($array, 'zero');
+// ['zero', 'one', 'two', 'three', 'four']
+При необходимости вы можете указать ключ, который следует использовать для значения:
+use Illuminate\Support\Arr;
+$array = ['price' => 100];
+$array = Arr::prepend($array, 'Desk', 'name');
+// ['name' => 'Desk', 'price' => 100]
+
+Arr::pull()
+Метод Arr :: pull возвращает и удаляет пару ключ / значение из массива:
+use Illuminate\Support\Arr;
+
+$array = ['name' => 'Desk', 'price' => 100];
+
+$name = Arr::pull($array, 'name');
+
+// $name: Desk
+
+// $array: ['price' => 100]
+В качестве третьего аргумента метода может быть передано значение по умолчанию. Это значение будет возвращено, если ключ не существует:
+use Illuminate\Support\Arr;
+
+$value = Arr::pull($array, $key, $default);
+
+Arr::query()
+Метод Arr :: query преобразует массив в строку запроса:
+use Illuminate\Support\Arr;
+
+$array = ['name' => 'Taylor', 'order' => ['column' => 'created_at', 'direction' => 'desc']];
+
+Arr::query($array);
+
+// name=Taylor&order[column]=created_at&order[direction]=desc
+
+Arr::random()
+Метод Arr :: random возвращает случайное значение из массива:
+use Illuminate\Support\Arr;
+
+$array = [1, 2, 3, 4, 5];
+
+$random = Arr::random($array);
+
+// 4 - (retrieved randomly)
+Вы также можете указать количество возвращаемых элементов в качестве необязательного второго аргумента. Обратите внимание, что предоставление этого аргумента вернет массив, даже если требуется только один элемент:
+use Illuminate\Support\Arr;
+
+$items = Arr::random($array, 2);
+
+// [2, 5] - (retrieved randomly)
+
+Arr::set()
+Установить значение в многоуровневом массиве, используя синтаксис имени с точкой.
+use Illuminate\Support\Arr;
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+Arr::set($array, 'products.desk.price', 200);
+
+// ['products' => ['desk' => ['price' => 200]]]
+
+Arr::shuffle()
+Метод Arr :: shuffle случайным образом перемешивает элементы в массиве:
+use Illuminate\Support\Arr;
+
+$array = Arr::shuffle([1, 2, 3, 4, 5]);
+
+// [3, 2, 5, 1, 4] - (generated randomly)
+
+Arr::sort()
+Метод Arr :: sort сортирует массив по его значениям:
+use Illuminate\Support\Arr;
+
+$array = ['Desk', 'Table', 'Chair'];
+
+$sorted = Arr::sort($array);
+
+// ['Chair', 'Desk', 'Table']
+
+Отсортировать массив по результатам вызовов переданной функции-замыкания.
+use Illuminate\Support\Arr;
+
+$array = [
+    ['name' => 'Desk'],
+    ['name' => 'Table'],
+    ['name' => 'Chair'],
+];
+
+$sorted = array_values(Arr::sort($array, function ($value) {
+    return $value['name'];
+}));
+
+/*
+    [
+        ['name' => 'Chair'],
+        ['name' => 'Desk'],
+        ['name' => 'Table'],
+    ]
+*/
+
+Arr::sortRecursive()
+Метод Arr :: sortRecursive рекурсивно сортирует массив, используя функцию sort для числовых подмассивов и ksort для ассоциативных подмассивов:
+use Illuminate\Support\Arr;
+
+$array = [
+    ['Roman', 'Taylor', 'Li'],
+    ['PHP', 'Ruby', 'JavaScript'],
+    ['one' => 1, 'two' => 2, 'three' => 3],
+];
+
+$sorted = Arr::sortRecursive($array);
+
+/*
+    [
+        ['JavaScript', 'PHP', 'Ruby'],
+        ['one' => 1, 'three' => 3, 'two' => 2],
+        ['Li', 'Roman', 'Taylor'],
+    ]
+*/
+
+Arr::where()
+Фильтровать массив с помощью переданной функции-замыкания.
+use Illuminate\Support\Arr;
+
+$array = [100, '200', 300, '400', 500];
+
+$filtered = Arr::where($array, function ($value, $key) {
+    return is_string($value);
+});
+
+// [1 => '200', 3 => '400']
+
+Arr::wrap()
+Метод Arr :: wrap заключает данное значение в массив. Если данное значение уже является массивом, оно не будет изменено:
+use Illuminate\Support\Arr;
+
+$string = 'Laravel';
+
+$array = Arr::wrap($string);
+
+// ['Laravel']
+Если заданное значение равно нулю, будет возвращен пустой массив:
+use Illuminate\Support\Arr;
+
+$nothing = null;
+
+$array = Arr::wrap($nothing);
+
+// []
+
+data_fill()
+Функция data_fill устанавливает пропущенное значение во вложенном массиве или объекте, используя "точечную" нотацию:
+$data = ['products' => ['desk' => ['price' => 100]]];
+
+data_fill($data, 'products.desk.price', 200);
+
+// ['products' => ['desk' => ['price' => 100]]]
+
+data_fill($data, 'products.desk.discount', 10);
+
+// ['products' => ['desk' => ['price' => 100, 'discount' => 10]]]
+Эта функция также принимает звездочки в качестве подстановочных знаков и соответствующим образом заполняет цель:
+$data = [
+    'products' => [
+        ['name' => 'Desk 1', 'price' => 100],
+        ['name' => 'Desk 2'],
+    ],
+];
+
+data_fill($data, 'products.*.price', 200);
+
+/*
+    [
+        'products' => [
+            ['name' => 'Desk 1', 'price' => 100],
+            ['name' => 'Desk 2', 'price' => 200],
+        ],
+    ]
+*/
+
+data_get()
+Функция data_get извлекает значение из вложенного массива или объекта, используя "точечную" нотацию:
+$data = ['products' => ['desk' => ['price' => 100]]];
+
+$price = data_get($data, 'products.desk.price');
+
+// 100
+Функция data_get также принимает значение по умолчанию, которое будет возвращено, если указанный ключ не найден:
+$discount = data_get($data, 'products.desk.discount', 0);
+
+// 0
+
+Функция также принимает подстановочные знаки с использованием звездочек, которые могут указывать на любой ключ массива или объекта:
+wildcards
+
+$data = [
+    'product-one' => ['name' => 'Desk 1', 'price' => 100],
+    'product-two' => ['name' => 'Desk 2', 'price' => 150],
+];
+
+data_get($data, '*.name');
+
+// ['Desk 1', 'Desk 2'];
+
+data_set()
+Функция data_set устанавливает значение во вложенном массиве или объекте, используя "точечную" нотацию:
+$data = ['products' => ['desk' => ['price' => 100]]];
+
+data_set($data, 'products.desk.price', 200);
+
+// ['products' => ['desk' => ['price' => 200]]]
+Эта функция также принимает подстановочные знаки и соответственно устанавливает значения для цели:
+$data = [
+    'products' => [
+        ['name' => 'Desk 1', 'price' => 100],
+        ['name' => 'Desk 2', 'price' => 150],
+    ],
+];
+
+data_set($data, 'products.*.price', 200);
+
+/*
+    [
+        'products' => [
+            ['name' => 'Desk 1', 'price' => 200],
+            ['name' => 'Desk 2', 'price' => 200],
+        ],
+    ]
+*/
+По умолчанию все существующие значения перезаписываются. Если вы хотите установить значение, только если оно не существует, вы можете передать false в качестве четвертого аргумента:
+$data = ['products' => ['desk' => ['price' => 100]]];
+
+data_set($data, 'products.desk.price', 200, false);
+
+// ['products' => ['desk' => ['price' => 100]]]
+
+head()
+Функция head возвращает первый элемент в данном массиве:
+$array = [100, 200, 300];
+
+$first = head($array);
+
+// 100
+
+last()
+Последняя функция возвращает последний элемент в данном массиве:
+$array = [100, 200, 300];
+
+$last = last($array);
+
+// 300
+
+
+
+
+Пути
+app_path()
+Получить полный путь к папке app. Также вы можете использовать функцию app_path() для получения полного пути к указанному файлу относительно каталога приложения:
+
+$path = app_path();
+
+$path = app_path('Http/Controllers/Controller.php');
+
+
+base_path()
+Получить полный путь к корневой папке приложения. Также вы можете использовать функцию base_path() для получения полного пути к указанному файлу относительно корня проекта:
+
+$path = base_path();
+
+$path = base_path('vendor/bin');
+
+config_path
+
+Получить полный путь к папке config:
+PHP
+
+$path = config_path();
+$path = config_path('app.php');
+
+
+database_path
+
+Функция database_path() возвращает полный путь к папке базы данных приложения. Вы также можете использовать функцию database_path для создания полного пути к заданному файлу в каталоге базы данных:
+$path = database_path();
+$path = database_path('factories/UserFactory.php');
+
+mix()
+
+Функция mix возвращает путь к файлу Mix с версией:
+$path = mix('css/app.css');
+
+public_path()
+Функция public_path возвращает полный путь к public каталогу. Вы также можете использовать функцию public_path для создания полного пути к заданному файлу в общедоступном каталоге:
+$path = public_path();
+
+$path = public_path('css/app.css');
+
+resource_path()
+resource_path
+
+Получить полный путь к папке resources. Эту функцию можно использовать, чтобы сгенерировать полный путь к файлу относительно папки хранилища:
+
+$path = resource_path();
+
+$path = resource_path('assets/sass/app.scss');
+
+storage_path
+
+Получить полный путь к папке storage. Также вы можете использовать функцию storage_path() для получения полного пути к указанному файлу относительно каталога storage:
+PHP
+
+$path = storage_path();
+
+$path = storage_path('app/file.txt');
+
+
+Строки
+__()
+Функция __() переводит заданную строку перевода или ключ перевода, используя ваши файлы локализации:
+echo __('Welcome to our application');
+
+echo __('messages.welcome');
+Если указанная строка перевода или ключ не существует, функция __ вернет заданное значение. Итак, используя приведенный выше пример, функция __ вернет messages.welcome, если этот ключ перевода не существует.
+
+
+
+Может войдёшь?
+Черновики Написать статью Профиль
+Функции
+
+Helper Functions → Community Community +1 015
+20 июня 2015
+
+перевод документация 5.х
+
+    1. Введение
+    2. Массивы
+        2.1. array_add
+        2.2. array_collapse
+        2.3. array_divide
+        2.4. array_dot
+        2.5. array_except
+        2.6. array_first
+        2.7. array_flatten
+        2.8. array_forget
+        2.9. array_fetch
+        2.10. array_get
+        2.11. array_has
+        2.12. array_last
+        2.13. array_only
+        2.14. array_pluck
+        2.15. array_prepend
+        2.16. array_pull
+        2.17. array_set
+        2.18. array_sort
+        2.19. array_sort_recursive
+        2.20. array_where
+        2.21. head
+        2.22. last
+    3. Пути
+        3.1. app_path
+        3.2. base_path
+        3.3. config_path
+        3.4. database_path
+        3.5. elixir
+        3.6. public_path
+        3.7. resource_path
+        3.8. storage_path
+    4. Маршруты
+        4.1. get
+        4.2. post
+        4.3. put
+        4.4. patch
+        4.5. delete
+        4.6. resource
+    5. Строки
+        5.1. camel_case
+        5.2. class_basename
+        5.3. e
+        5.4. ends_with
+        5.5. snake_case
+        5.6. str_limit
+        5.7. starts_with
+        5.8. str_contains
+        5.9. str_finish
+        5.10. str_is
+        5.11. str_plural
+        5.12. str_random
+        5.13. str_singular
+        5.14. str_slug
+        5.15. studly_case
+        5.16. title_case
+        5.17. trans
+        5.18. trans_choice
+    6. URL-адреса
+        6.1. action
+        6.2. asset
+        6.3. secure_asset
+        6.4. route
+        6.5. secure_url
+        6.6. url
+    7. Прочее
+        7.1. abort
+        7.2. abort_if
+        7.3. abort_unless
+        7.4. auth
+        7.5. back
+        7.6. bcrypt
+        7.7. collect
+        7.8. config
+        7.9. csrf_field
+        7.10. cache
+        7.11. csrf_token
+        7.12. dd
+        7.13. dispatch
+        7.14. env
+        7.15. event
+        7.16. info
+        7.17. logger
+        7.18. factory
+        7.19. method_field
+        7.20. old
+        7.21. redirect
+        7.22. request
+        7.23. response
+        7.24. session
+        7.25. value
+        7.26. view
+        7.27. with
+
+Этот перевод актуален для англоязычной документации на 08.12.2016 (ветка 5.2) , 19.06.2016 (ветка 5.1) и 31.07.2015 (ветка 5.0). Опечатка? Выдели и нажми Ctrl+Enter.
+Введение
+
+Laravel содержит множество глобальных «вспомогательных» PHP-функций. Многие из них используются самим фреймворком, но вы также можете использовать их в своих приложениях, если они вам понадобятся.
+Массивы
+array_add
+
+Добавить указанную пару ключ/значение в массив, если она там ещё не существует.
+
+$array = array_add(['name' => 'Desk'], 'price', 100);
+
+// ['name' => 'Desk', 'price' => 100]
+
+array_collapse
+
+Функция array_collapse() (Laravel 5.1+) собирает массив массивов в единый массив:
+
+$array = array_collapse([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+
+// [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+array_divide
+
+Вернуть два массива — один с ключами, другой со значениями оригинального массива.
+
+list($keys, $values) = array_divide(['name' => 'Desk']);
+
+// $keys: ['name']
+
+// $values: ['Desk']
+
+array_dot
+
+Сделать многоуровневый массив плоским, объединяя вложенные массивы с помощью точки в именах.
+
+$array = array_dot(['foo' => ['bar' => 'baz']]);
+
+// ['foo.bar' => 'baz'];
+
+array_except
+
+Удалить указанную пару ключ/значение из массива.
+
+$array = ['name' => 'Desk', 'price' => 100];
+
+$array = array_except($array, ['price']);
+
+// ['name' => 'Desk']
+
+array_first
+
+Вернуть первый элемент массива, удовлетворяющий требуемому условию.
+
+$array = [100, 200, 300];
+
+$value = array_first($array, function ($value, $key) {
+  return $value >= 150;
+});
+
+// 200
+
+Третьим параметром можно передать значение по умолчанию на случай, если ни одно значение не пройдёт условие:
+
+$value = array_first($array, $callback, $default);
+
+array_flatten
+
+Сделать многоуровневый массив плоским.
+
+$array = ['name' => 'Joe', 'languages' => ['PHP', 'Ruby']];
+
+$array = array_flatten($array);
+
+// ['Joe', 'PHP', 'Ruby'];
+
+array_forget
+
+Удалить указанную пару ключ/значение из многоуровневого массива, используя синтаксис имени с точкой.
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+array_forget($array, 'products.desk');
+
+// ['products' => []]
+
++ 5.0
+
+добавлено в 5.0 (08.02.2016)
+array_fetch
+
+Функция array_fetch() возвращает одноуровневый массив с выбранными элементами по переданному пути.
+
+$array = [
+  ['developer' => ['name' => 'Taylor']],
+  ['developer' => ['name' => 'Dayle']]
+];
+
+$array = array_fetch($array, 'developer.name');
+
+// ['Taylor', 'Dayle'];
+
+array_get
+
+Вернуть значение из многоуровневого массива, используя синтаксис имени с точкой.
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+$value = array_get($array, 'products.desk');
+
+// ['price' => 100]
+
+Также третьим аргументом можно передать значение по умолчанию на случай, если указанный ключ не будет найден:
+
+$value = array_get($array, 'names.john', 'default');
+
+Если вам нужно что-то похожее на array_get(), но только для объектов, используйте object_get().
++ 5.3 5.2 5.1
+
+добавлено в 5.3 (28.01.2017) 5.2 (08.12.2016) 5.1 (01.04.2016)
+array_has
+
+Функция array_has() проверяет существование данного элемента или элементов в массиве с помощью «точечной» записи:
+
+$array = ['product' => ['name' => 'desk', 'price' => 100]];
+
+$hasItem = array_has($array, 'product.name');
+
+// true
+
+$hasItems = array_has($array, ['product.price', 'product.discount']);
+
+// false
+
++ 5.3 5.0
+
+добавлено в 5.3 (28.01.2017) 5.0 (08.02.2016)
+array_last
+
+Функция array_last() возвращает последний элемент массива, удовлетворяющий требуемому условию:
+
+$array = [100, 200, 300, 110];
+
+$value = array_last($array, function ($value, $key) {
+  return $value >= 150;
+});
+
+// 300
+
++ 5.0
+
+добавлено в 5.0 (08.02.2016)
+
+Третьим параметром можно передать значение по умолчанию:
+
+$value = array_last($array, $callback, $default);
+
+array_only
+
+Вернуть из массива только указанные пары ключ/значения.
+
+$array = ['name' => 'Desk', 'price' => 100, 'orders' => 10];
+
+$array = array_only($array, ['name', 'price']);
+
+// ['name' => 'Desk', 'price' => 100]
+
+array_pluck
+
+Извлечь значения из многоуровневого массива, соответствующие переданному ключу.
+
+$array = [
+  ['developer' => ['id' => 1, 'name' => 'Taylor']],
+  ['developer' => ['id' => 2, 'name' => 'Abigail']],
+];
+
+$array = array_pluck($array, 'developer.name');
+
+// ['Taylor', 'Abigail'];
+
+Также вы можете указать ключ для полученного списка:
+
+$array = array_pluck($array, 'developer.name', 'developer.id');
+
+// [1 => 'Taylor', 2 => 'Abigail'];
+
++ 5.2
+
+добавлено в 5.2 (08.12.2016)
+array_prepend
+
+Поместить элемент в начало массива:
+
+$array = ['one', 'two', 'three', 'four'];
+
+$array = array_prepend($array, 'zero');
+
+// $array: ['zero', 'one', 'two', 'three', 'four']
+
+array_pull
+
+Извлечь значения из многоуровневого массива, соответствующие переданному ключу, и удалить их.
+
+$array = ['name' => 'Desk', 'price' => 100];
+
+$name = array_pull($array, 'name');
+
+// $name: Desk
+
+// $array: ['price' => 100]
+
+array_set
+
+Установить значение в многоуровневом массиве, используя синтаксис имени с точкой.
+
+$array = ['products' => ['desk' => ['price' => 100]]];
+
+array_set($array, 'products.desk.price', 200);
+
+// ['products' => ['desk' => ['price' => 200]]]
+
+array_sort
+
+Отсортировать массив по результатам вызовов переданной функции-замыкания.
+
+$array = [
+  ['name' => 'Desk'],
+  ['name' => 'Chair'],
+];
+
+$array = array_values(array_sort($array, function ($value) {
+  return $value['name'];
+}));
+
+/*
+  [
+    ['name' => 'Chair'],
+    ['name' => 'Desk'],
+  ]
+*/
+
++ 5.1
+
+добавлено в 5.1 (01.04.2016)
+array_sort_recursive
+
+Функция array_sort_recursive() рекурсивно сортирует массив с помощью функции sort():
+
+$array = [
+  [
+    'Roman',
+    'Taylor',
+    'Li',
+  ],
+  [
+    'PHP',
+    'Ruby',
+    'JavaScript',
+  ],
+];
+
+$array = array_sort_recursive($array);
+
+/*
+  [
+    [
+      'Li',
+      'Roman',
+      'Taylor',
+    ],
+    [
+      'JavaScript',
+      'PHP',
+      'Ruby',
+    ]
+  ];
+*/
+
+array_where
+
+Фильтровать массив с помощью переданной функции-замыкания.
+
+$array = [100, '200', 300, '400', 500];
+
+$array = array_where($array, function ($value, $key) {
+  return is_string($value);
+});
+
+// [1 => 200, 3 => 400]
+
+head
+
+Вернуть первый элемент массива.
+
+$array = [100, 200, 300];
+
+$first = head($array);
+
+// 100
+
+last
+
+Вернуть последний элемент массива.
+
+$array = [100, 200, 300];
+
+$last = last($array);
+
+// 300
+
+Пути
+app_path
+
+Получить полный путь к папке app. Также вы можете использовать функцию app_path() для получения полного пути к указанному файлу относительно каталога приложения:
+
+$path = app_path();
+
+$path = app_path('Http/Controllers/Controller.php');
+
+base_path
+
+Получить полный путь к корневой папке приложения. Также вы можете использовать функцию base_path() для получения полного пути к указанному файлу относительно корня проекта:
+
+$path = base_path();
+
+$path = base_path('vendor/bin');
+
+config_path
+
+Получить полный путь к папке config:
+
+$path = config_path();
+
++ 5.1
+
+добавлено в 5.1 (01.04.2016)
+database_path
+
+Функция database_path() возвращает полный путь к папке базы данных приложения:
+
+$path = database_path();
+
+elixir
+
+Функция elixir() получает путь к файлу Elixir в системе контроля версий:
+
+elixir($file);
+
+public_path
+
+Получить полный путь к папке public:
+
+$path = public_path();
+
++ 5.3 5.2
+
+добавлено в 5.3 (28.01.2017) 5.2 (08.12.2016)
+resource_path
+
+Получить полный путь к папке resources. Эту функцию можно использовать, чтобы сгенерировать полный путь к файлу относительно папки хранилища:
+
+$path = resource_path();
+
+$path = resource_path('assets/sass/app.scss');
+
+storage_path
+
+Получить полный путь к папке storage. Также вы можете использовать функцию storage_path() для получения полного пути к указанному файлу относительно каталога storage:
+
+$path = storage_path();
+
+$path = storage_path('app/file.txt');
+
++ 5.0
+
+добавлено в 5.0 (08.02.2016)
+Маршруты
+get
+
+Зарегистрировать новый маршрут GET.
+
+get('/', function() { return 'Hello World'; });
+
+post
+
+Зарегистрировать новый маршрут POST.
+
+post('foo/bar', 'FooController@action');
+
+put
+
+Зарегистрировать новый маршрут PUT.
+
+put('foo/bar', 'FooController@action');
+
+patch
+
+Зарегистрировать новый маршрут PATCH.
+
+patch('foo/bar', 'FooController@action');
+
+delete
+
+Зарегистрировать новый маршрут DELETE.
+
+delete('foo/bar', 'FooController@action');
+
+resource
+
+Зарегистрировать новый маршрут ресурса RESTful.
+
+resource('foo', 'FooController');
+
+Строки
+camel_case
+
+Преобразовать строку в camelCase.
+
+$camel = camel_case('foo_bar');
+
+// fooBar
+
+class_basename
+
+Получить имя переданного класса без пространства имён.
+
+$class = class_basename('Foo\Bar\Baz');
+
+// Baz
+
+e
+Функция e запускает функцию PHP htmlspecialchars с параметром double_encode, установленным по умолчанию в значение true:
+echo e('< html>foo< /html>');
+// &lt;html&gt;foo&lt;/html&gt;
+
+preg_replace_array()
+Функция preg_replace_array последовательно заменяет заданный шаблон в строке, используя массив:
+$string = 'The event will take place between :start and :end';
+$replaced = preg_replace_array('/:[a-z_]+/', ['8:30', '9:00'], $string);
+// The event will take place between 8:30 and 9:00
+
+Str::after()
+Метод Str :: after возвращает все, что находится после заданного значения в строке. Вся строка будет возвращена, если значение не существует в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::after('This is my name', 'This is');
+
+// ' my name'
+
+Str::afterLast()
+Метод Str :: afterLast возвращает все, что находится после последнего вхождения данного значения в строку. Вся строка будет возвращена, если значение не существует в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::afterLast('App\Http\Controllers\Controller', '\\');
+
+// 'Controller'
+
+Str::ascii()
+Метод Str :: ascii попытается транслитерировать строку в значение ASCII:
+use Illuminate\Support\Str;
+
+$slice = Str::ascii('û');
+
+// 'u'
+
+Str::before()
+Метод Str :: before возвращает все, что находится перед заданным значением в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::before('This is my name', 'my name');
+
+// 'This is '
+
+Str::beforeLast()
+Метод Str :: beforeLast возвращает все, что было до последнего появления данного значения в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::beforeLast('This is my name', 'is');
+
+// 'This '
+
+Str::between()
+Метод Str :: between возвращает часть строки между двумя значениями:
+use Illuminate\Support\Str;
+
+$slice = Str::between('This is my name', 'This', 'name');
+
+// ' is my '
+
+Str::camel()
+Метод Str :: camel преобразует заданную строку в camelCase:
+use Illuminate\Support\Str;
+
+$converted = Str::camel('foo_bar');
+
+// fooBar
+
+Str::contains()
+Определить, содержит ли строка переданную подстроку.
+use Illuminate\Support\Str;
+$contains = Str::contains('This is my name', 'my');
+// true
+Также вы можете передать массив значений, чтобы определить, содержит ли строка любое из них:
+use Illuminate\Support\Str;
+
+$contains = Str::contains('This is my name', ['my', 'foo']);
+
+// true
+
+Str::containsAll()
+Метод Str :: containsAll определяет, содержит ли данная строка все значения массива:
+use Illuminate\Support\Str;
+
+$containsAll = Str::containsAll('This is my name', ['my', 'name']);
+
+// true
+
+Str::endsWith()
+Метод Str ::ndsWith определяет, заканчивается ли данная строка заданным значением:
+use Illuminate\Support\Str;
+
+$result = Str::endsWith('This is my name', 'name');
+
+// true
+Вы также можете передать массив значений, чтобы определить, заканчивается ли данная строка любым из указанных значений:
+
+use Illuminate\Support\Str;
+
+$result = Str::endsWith('This is my name', ['name', 'foo']);
+
+// true
+
+$result = Str::endsWith('This is my name', ['this', 'foo']);
+
+// false
+
+Str::finish()
+Добавить одно вхождение подстроки в конец переданной строки.
+Метод Str :: finish добавляет один экземпляр данного значения к строке, если она еще не заканчивается значением:
+use Illuminate\Support\Str;
+
+$adjusted = Str::finish('this/string', '/');
+
+// this/string/
+
+$adjusted = Str::finish('this/string/', '/');
+
+// this/string/
+
+Str::is()
+Метод Str :: is определяет, соответствует ли данная строка заданному шаблону. Звездочки могут использоваться для обозначения подстановочных знаков:
+use Illuminate\Support\Str;
+
+$matches = Str::is('foo*', 'foobar');
+
+// true
+
+$matches = Str::is('baz*', 'foobar');
+
+// false
+
+Str::isAscii()
+Метод Str :: isAscii определяет, является ли данная строка 7-битным ASCII:
+use Illuminate\Support\Str;
+
+$isAscii = Str::isAscii('Taylor');
+
+// true
+
+$isAscii = Str::isAscii('ü');
+
+// false
+
+Str::isUuid()
+Метод Str :: isUuid определяет, является ли данная строка допустимым UUID:
+use Illuminate\Support\Str;
+
+$isUuid = Str::isUuid('a0a2a2d2-0b87-4a18-83f2-2529882be2de');
+
+// true
+
+$isUuid = Str::isUuid('laravel');
+
+// false
+
+Str::kebab()
+Метод Str :: kebab преобразует заданную строку в kebab-case:
+use Illuminate\Support\Str;
+
+$converted = Str::kebab('fooBar');
+
+// foo-bar
+
+Str::length()
+Метод Str :: length возвращает длину заданной строки:
+use Illuminate\Support\Str;
+
+$length = Str::length('Laravel');
+
+// 7
+
+Str::limit()
+Метод Str :: limit обрезает данную строку до указанной длины:
+use Illuminate\Support\Str;
+
+$truncated = Str::limit('The quick brown fox jumps over the lazy dog', 20);
+
+// The quick brown fox...
+Вы также можете передать третий аргумент, чтобы изменить строку, которая будет добавлена в конец:
+use Illuminate\Support\Str;
+
+$truncated = Str::limit('The quick brown fox jumps over the lazy dog', 20, ' (...)');
+
+// The quick brown fox (...)
+
+Str::lower()
+Метод Str :: lower преобразует данную строку в нижний регистр:
+use Illuminate\Support\Str;
+
+$converted = Str::lower('LARAVEL');
+
+// laravel
+
+Str::orderedUuid()
+Метод Str :: ordersUuid генерирует UUID "сначала временная метка", который можно эффективно сохранить в индексированном столбце базы данных:
+use Illuminate\Support\Str;
+
+return (string) Str::orderedUuid();
+
+Str::padBoth()
+Метод Str :: padBoth оборачивает функцию PHP str_pad, дополняя обе стороны строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::padBoth('James', 10, '_');
+
+// '__James___'
+
+$padded = Str::padBoth('James', 10);
+
+// '  James   '
+
+Str::padLeft()
+Метод String :: padLeft оборачивает функцию PHP str_pad, дополняя левую часть строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::padLeft('James', 10, '-=');
+
+// '-=-=-James'
+
+$padded = Str::padLeft('James', 10);
+
+// '     James'
+
+Str::padRight()
+Метод String :: padRight оборачивает функцию PHP str_pad, дополняя правую часть строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::padRight('James', 10, '-');
+
+// 'James-----'
+
+$padded = Str::padRight('James', 10);
+
+// 'James     '
+
+Str::plural()
+Метод Str :: plural преобразует строку из одного слова во множественное число. Эта функция в настоящее время поддерживает только английский язык:
+use Illuminate\Support\Str;
+
+$plural = Str::plural('car');
+
+// cars
+
+$plural = Str::plural('child');
+
+// children
+Вы можете указать целое число в качестве второго аргумента функции для получения единственного или множественного числа строки:
+use Illuminate\Support\Str;
+
+$plural = Str::plural('child', 2);
+
+// children
+
+$plural = Str::plural('child', 1);
+
+// child
+
+Str::random()
+Метод Str :: random генерирует случайную строку указанной длины. Эта функция использует функцию PHP random_bytes:
+use Illuminate\Support\Str;
+
+$random = Str::random(40);
+
+Str::replaceArray()
+
+Метод Str :: replaceArray последовательно заменяет заданное значение в строке, используя массив:
+
+use Illuminate\Support\Str;
+
+$string = 'The event will take place between ? and ?';
+
+$replaced = Str::replaceArray('?', ['8:30', '9:00'], $string);
+
+// The event will take place between 8:30 and 9:00
+
+Str::replaceFirst()
+Метод Str :: replaceFirst заменяет первое вхождение заданного значения в строке:
+use Illuminate\Support\Str;
+
+$replaced = Str::replaceFirst('the', 'a', 'the quick brown fox jumps over the lazy dog');
+
+// a quick brown fox jumps over the lazy dog
+
+Str::replaceLast()
+use Illuminate\Support\Str;
+
+$replaced = Str::replaceFirst('the', 'a', 'the quick brown fox jumps over the lazy dog');
+
+// a quick brown fox jumps over the lazy dog
+
+Str::replaceLast()
+Метод Str :: replaceLast заменяет последнее вхождение данного значения в строке:
+use Illuminate\Support\Str;
+
+$replaced = Str::replaceLast('the', 'a', 'the quick brown fox jumps over the lazy dog');
+
+// the quick brown fox jumps over a lazy dog
+
+Str::singular()
+Метод Str :: singular преобразует строку в ее особую форму. Эта функция в настоящее время поддерживает только английский язык:
+use Illuminate\Support\Str;
+
+$singular = Str::singular('cars');
+
+// car
+
+$singular = Str::singular('children');
+
+// child
+
+Str::slug()
+Метод Str :: slug генерирует дружественный URL-адрес "slug" из заданной строки:
+use Illuminate\Support\Str;
+
+$slug = Str::slug('Laravel 5 Framework', '-');
+
+// laravel-5-framework
+
+Str::snake()
+Метод Str :: snake преобразует заданную строку в snake_case:
+use Illuminate\Support\Str;
+
+$converted = Str::snake('fooBar');
+
+// foo_bar
+
+Str::start()
+Метод Str :: start добавляет в строку единственный экземпляр данного значения, если он еще не начинается со значения:
+use Illuminate\Support\Str;
+
+$adjusted = Str::start('this/string', '/');
+
+// /this/string
+
+$adjusted = Str::start('/this/string', '/');
+
+// /this/string
+
+Str::startsWith()
+Метод Str :: startWith определяет, начинается ли данная строка с заданного значения:
+use Illuminate\Support\Str;
+
+$result = Str::startsWith('This is my name', 'This');
+
+// true
+
+Str::studly()
+Метод Str :: studly преобразует заданную строку в StudlyCase:
+use Illuminate\Support\Str;
+
+$converted = Str::studly('foo_bar');
+
+// FooBar
+
+Str::substr()
+Метод Str :: substr возвращает часть строки, указанную параметрами start и length:
+use Illuminate\Support\Str;
+
+$converted = Str::substr('The Laravel Framework', 4, 7);
+
+// Laravel
+
+Str::title()
+Метод Str :: title преобразует данную строку в Title Case:
+use Illuminate\Support\Str;
+
+$converted = Str::title('a nice title uses the correct case');
+
+// A Nice Title Uses The Correct Case
+
+Str::ucfirst()
+Метод Str :: ucfirst возвращает заданную строку с первым символом с большой буквы:
+use Illuminate\Support\Str;
+
+$string = Str::ucfirst('foo bar');
+
+// Foo bar
+
+Str::upper()
+Метод Str :: upper преобразует данную строку в верхний регистр:
+use Illuminate\Support\Str;
+
+$string = Str::upper('laravel');
+
+// LARAVEL
+
+Str::uuid()
+Метод Str :: uuid генерирует UUID (версия 4):
+use Illuminate\Support\Str;
+
+return (string) Str::uuid();
+
+Str::words()
+Метод Str :: words ограничивает количество слов в строке:
+use Illuminate\Support\Str;
+
+return Str::words('Perfectly balanced, as all things should be.', 3, ' >>>');
+
+// Perfectly balanced, as >>>
+
+trans()
+Функция trans переводит указанный ключ перевода, используя ваши файлы локализации:
+echo trans('messages.welcome');
+Если указанный ключ перевода не существует, функция trans вернет заданный ключ. Итак, используя приведенный выше пример, функция trans вернет messages.welcome, если ключ перевода не существует.
+
+trans_choice()
+Функция trans_choice переводит заданный ключ перевода с перегибом:
+echo trans_choice('messages.notifications', $unreadCount);
+Если указанный ключ трансляции не существует, функция trans_choice вернет данный ключ. Итак, используя приведенный выше пример, функция trans_choice вернет messages.notifications, если ключ перевода не существует.
 
 
 
 
 
+Свободные строки
+Свободные строки обеспечивают более гибкий объектно-ориентированный интерфейс для работы со строковыми значениями, позволяя объединять несколько строковых операций вместе с использованием более удобочитаемого синтаксиса по сравнению с традиционными строковыми операциями.
+
+after
+Метод after возвращает все, что находится после заданного значения в строке. Вся строка будет возвращена, если значение не существует в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::of('This is my name')->after('This is');
+
+// ' my name'
+
+afterLast
+Метод afterLast возвращает все, что находится после последнего появления данного значения в строке. Вся строка будет возвращена, если значение не существует в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::of('App\Http\Controllers\Controller')->afterLast('\\');
+
+// 'Controller'
+
+append
+Метод append добавляет заданные значения в строку:
+use Illuminate\Support\Str;
+
+$string = Str::of('Taylor')->append(' Otwell');
+
+// 'Taylor Otwell'
+
+ascii
+Метод ascii попытается транслитерировать строку в значение ASCII:
+use Illuminate\Support\Str;
+
+$string = Str::of('ü')->ascii();
+
+// 'u'
+
+basename
+Метод basename вернет завершающий компонент имени данной строки:
+use Illuminate\Support\Str;
+
+$string = Str::of('/foo/bar/baz')->basename();
+
+// 'baz'
+При необходимости вы можете предоставить «расширение», которое будет удалено из конечного компонента:
+use Illuminate\Support\Str;
+
+$string = Str::of('/foo/bar/baz.jpg')->basename('.jpg');
+
+// 'baz'
+
+before
+Метод before возвращает все, что находится перед заданным значением в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::of('This is my name')->before('my name');
+
+// 'This is '
+
+beforeLast
+Метод beforeLast возвращает все, что было до последнего появления данного значения в строке:
+use Illuminate\Support\Str;
+
+$slice = Str::of('This is my name')->beforeLast('is');
+
+// 'This '
+
+camel
+Метод camel преобразует данную строку в camelCase:
+use Illuminate\Support\Str;
+
+$converted = Str::of('foo_bar')->camel();
+
+// fooBar
+
+contains
+Метод contains определяет, содержит ли данная строка данное значение (с учетом регистра):
+use Illuminate\Support\Str;
+
+$contains = Str::of('This is my name')->contains('my');
+
+// true
+Вы также можете передать массив значений, чтобы определить, содержит ли данная строка какое-либо из значений:
+use Illuminate\Support\Str;
+
+$contains = Str::of('This is my name')->contains(['my', 'foo']);
+
+// true
+
+containsAll
+Метод containsAll определяет, содержит ли данная строка все значения массива:
+use Illuminate\Support\Str;
+
+$containsAll = Str::of('This is my name')->containsAll(['my', 'name']);
+
+// true
+
+dirname
+Метод dirname возвращает часть родительского каталога данной строки:
+use Illuminate\Support\Str;
+
+$string = Str::of('/foo/bar/baz')->dirname();
+
+// '/foo/bar'
+При желании вы можете указать, сколько уровней каталогов вы хотите удалить из строки:
+use Illuminate\Support\Str;
+
+$string = Str::of('/foo/bar/baz')->dirname(2);
+
+// '/foo'
+
+endsWith
+Метод endWith определяет, заканчивается ли данная строка заданным значением:
+use Illuminate\Support\Str;
+
+$result = Str::of('This is my name')->endsWith('name');
+
+// true
+Вы также можете передать массив значений, чтобы определить, заканчивается ли данная строка любым из указанных значений:
+use Illuminate\Support\Str;
+
+$result = Str::of('This is my name')->endsWith(['name', 'foo']);
+
+// true
+
+$result = Str::of('This is my name')->endsWith(['this', 'foo']);
+
+// false
+
+exactly
+exactly метод определяет, является ли данная строка точным совпадением с другой строкой:
+use Illuminate\Support\Str;
+
+$result = Str::of('Laravel')->exactly('Laravel');
+
+// true
+
+explode
+Метод explode разбивает строку по заданному разделителю и возвращает коллекцию, содержащую каждый раздел разбитой строки:
+use Illuminate\Support\Str;
+
+$collection = Str::of('foo bar baz')->explode(' ');
+
+// collect(['foo', 'bar', 'baz'])
+
+finish
+Метод finish добавляет один экземпляр заданного значения в строку, если она еще не заканчивается значением:
+use Illuminate\Support\Str;
+
+$adjusted = Str::of('this/string')->finish('/');
+
+// this/string/
+
+$adjusted = Str::of('this/string/')->finish('/');
+
+// this/string/
+
+is
+Метод is определяет, соответствует ли данная строка заданному шаблону. Звездочки могут использоваться для обозначения подстановочных знаков:
+use Illuminate\Support\Str;
+
+$matches = Str::of('foobar')->is('foo*');
+
+// true
+
+$matches = Str::of('foobar')->is('baz*');
+
+// false
+
+isAscii
+Метод isAscii определяет, является ли данная строка строкой ASCII:
+use Illuminate\Support\Str;
+
+$result = Str::of('Taylor')->isAscii();
+
+// true
+
+$result = Str::of('ü')->isAscii();
+
+// false
+
+isEmpty
+Метод isEmpty определяет, является ли данная строка пустой:
+use Illuminate\Support\Str;
+
+$result = Str::of('  ')->trim()->isEmpty();
+
+// true
+
+$result = Str::of('Laravel')->trim()->isEmpty();
+
+// false
+
+isNotEmpty
+Метод isNotEmpty определяет, не пуста ли данная строка:
+use Illuminate\Support\Str;
+
+$result = Str::of('  ')->trim()->isNotEmpty();
+
+// false
+
+$result = Str::of('Laravel')->trim()->isNotEmpty();
+
+// true
+
+kebab
+Метод kebab преобразует данную строку в kebab-case:
+use Illuminate\Support\Str;
+
+$converted = Str::of('fooBar')->kebab();
+
+// foo-bar
+
+length
+Метод length возвращает длину данной строки:
+use Illuminate\Support\Str;
+
+$length = Str::of('Laravel')->length();
+
+// 7
+
+limit
+Метод limit обрезает данную строку до указанной длины:
+use Illuminate\Support\Str;
+
+$truncated = Str::of('The quick brown fox jumps over the lazy dog')->limit(20);
+
+// The quick brown fox...
+Вы также можете передать второй аргумент, чтобы изменить строку, которая будет добавлена в конец:
+use Illuminate\Support\Str;
+
+$truncated = Str::of('The quick brown fox jumps over the lazy dog')->limit(20, ' (...)');
+
+// The quick brown fox (...)
+
+lower
+lower метод преобразует данную строку в нижний регистр:
+use Illuminate\Support\Str;
+
+$result = Str::of('LARAVEL')->lower();
+
+// 'laravel'
+
+ltrim
+Метод ltrim left обрезает данную строку:
+use Illuminate\Support\Str;
+
+$string = Str::of('  Laravel  ')->ltrim();
+
+// 'Laravel  '
+
+$string = Str::of('/Laravel/')->ltrim('/');
+
+// 'Laravel/'
+
+match
+Метод match вернет часть строки, которая соответствует заданному шаблону регулярного выражения:
+use Illuminate\Support\Str;
+
+$result = Str::of('foo bar')->match('/bar/');
+
+// 'bar'
+
+$result = Str::of('foo bar')->match('/foo (.*)/');
+
+// 'bar'
+
+matchAll
+Метод matchAll вернет коллекцию, содержащую части строки, соответствующие заданному шаблону регулярного выражения:
+use Illuminate\Support\Str;
+
+$result = Str::of('bar foo bar')->matchAll('/bar/');
+
+// collect(['bar', 'bar'])
+Если вы укажете соответствующую группу в выражении, Laravel вернет коллекцию совпадений этой группы:
+use Illuminate\Support\Str;
+
+$result = Str::of('bar fun bar fly')->matchAll('/f(\w*)/');
+
+// collect(['un', 'ly']);
+Если совпадений не найдено, будет возвращена пустая коллекция.
 
 
+padBoth
+Метод padBoth оборачивает функцию PHP str_pad, дополняя обе стороны строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::of('James')->padBoth(10, '_');
+
+// '__James___'
+
+$padded = Str::of('James')->padBoth(10);
+
+// '  James   '
+
+padLeft
+Метод padLeft оборачивает функцию PHP str_pad, дополняя левую часть строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::of('James')->padLeft(10, '-=');
+
+// '-=-=-James'
+
+$padded = Str::of('James')->padLeft(10);
+
+// '     James'
+
+padRight
+Метод padRight оборачивает функцию PHP str_pad, дополняя правую часть строки другим:
+use Illuminate\Support\Str;
+
+$padded = Str::of('James')->padRight(10, '-');
+
+// 'James-----'
+
+$padded = Str::of('James')->padRight(10);
+
+// 'James     '
+
+plural
+Метод plural преобразует строку из одного слова во множественное число. Эта функция в настоящее время поддерживает только английский язык:
+use Illuminate\Support\Str;
+
+$plural = Str::of('car')->plural();
+
+// cars
+
+$plural = Str::of('child')->plural();
+
+// children
+
+Вы можете указать целое число в качестве второго аргумента функции для получения единственного или множественного числа строки:
+use Illuminate\Support\Str;
+
+$plural = Str::of('child')->plural(2);
+
+// children
+
+$plural = Str::of('child')->plural(1);
+
+// child
+
+prepend
+Метод prepend добавляет данные значения к строке:
+use Illuminate\Support\Str;
+
+$string = Str::of('Framework')->prepend('Laravel ');
+
+// Laravel Framework
+
+replace
+Метод replace заменяет заданную строку внутри строки:
+use Illuminate\Support\Str;
+
+$replaced = Str::of('Laravel 6.x')->replace('6.x', '7.x');
+
+// Laravel 7.x
+
+replaceArray
+Метод replaceArray последовательно заменяет заданное значение в строке, используя массив:
+use Illuminate\Support\Str;
+
+$string = 'The event will take place between ? and ?';
+
+$replaced = Str::of($string)->replaceArray('?', ['8:30', '9:00']);
+
+// The event will take place between 8:30 and 9:00
+
+replaceFirst
+Метод replaceFirst заменяет первое вхождение данного значения в строке:
+use Illuminate\Support\Str;
+
+$replaced = Str::of('the quick brown fox jumps over the lazy dog')->replaceFirst('the', 'a');
+
+// a quick brown fox jumps over the lazy dog
+
+replaceLast
+Метод replaceLast заменяет последнее вхождение данного значения в строке:
+use Illuminate\Support\Str;
+
+$replaced = Str::of('the quick brown fox jumps over the lazy dog')->replaceLast('the', 'a');
+
+// the quick brown fox jumps over a lazy dog
+
+replaceMatches
+Метод replaceMatches заменяет все части строки, соответствующие заданному шаблону, заданной заменяющей строкой:
+use Illuminate\Support\Str;
+
+$replaced = Str::of('(+1) 501-555-1000')->replaceMatches('/[^A-Za-z0-9]++/', '')
+
+// '15015551000'
+Метод replaceMatches также принимает Closure, который будет вызываться с каждой частью строки, соответствующей данной стороне, что позволяет вам выполнить логику замены в Closure и вернуть замененное значение:
+
+use Illuminate\Support\Str;
+
+$replaced = Str::of('123')->replaceMatches('/\d/', function ($match) {
+    return '['.$match[0].']';
+});
+
+// '[1][2][3]'
+
+rtrim
+Метод rtrim обрезает данную строку справа:
+use Illuminate\Support\Str;
+
+$string = Str::of('  Laravel  ')->rtrim();
+
+// '  Laravel'
+
+$string = Str::of('/Laravel/')->rtrim('/');
+
+// '/Laravel'
+
+singular
+singular метод преобразует строку в ее особую форму. Эта функция в настоящее время поддерживает только английский язык:
+use Illuminate\Support\Str;
+
+$singular = Str::of('cars')->singular();
+
+// car
+
+$singular = Str::of('children')->singular();
+
+// child
+
+slug
+Метод slug генерирует дружественный URL-адрес "slug" из заданной строки:
+use Illuminate\Support\Str;
+
+$slug = Str::of('Laravel Framework')->slug('-');
+
+// laravel-framework
+
+snake
+Метод snake преобразует данную строку в snake_case:
+use Illuminate\Support\Str;
+
+$converted = Str::of('fooBar')->snake();
+
+// foo_bar
+
+split
+Метод split разбивает строку на коллекцию с помощью регулярного выражения:
+use Illuminate\Support\Str;
+
+$segments = Str::of('one, two, three')->split('/[\s,]+/');
+
+// collect(["one", "two", "three"])
+
+start
+Метод start добавляет один экземпляр заданного значения в строку, если она еще не начинается со значения:
+use Illuminate\Support\Str;
+
+$adjusted = Str::of('this/string')->start('/');
+
+// /this/string
+
+$adjusted = Str::of('/this/string')->start('/');
+
+// /this/string
+
+startsWith
+Метод startWith определяет, начинается ли данная строка с заданного значения:
+use Illuminate\Support\Str;
+
+$result = Str::of('This is my name')->startsWith('This');
+
+// true
+
+studly
+Метод studly преобразует данную строку в StudlyCase:
+use Illuminate\Support\Str;
+
+$converted = Str::of('foo_bar')->studly();
+
+// FooBar
+
+substr
+Метод substr возвращает часть строки, указанную заданными параметрами start и length:
+use Illuminate\Support\Str;
+
+$string = Str::of('Laravel Framework')->substr(8);
+
+// Framework
+
+$string = Str::of('Laravel Framework')->substr(8, 5);
+
+// Frame
+
+title
+Метод title преобразует данную строку в Title Case:
+
+use Illuminate\Support\Str;
+
+$converted = Str::of('a nice title uses the correct case')->title();
+
+// A Nice Title Uses The Correct Case
+
+trim
+Метод trim обрезает данную строку:
+use Illuminate\Support\Str;
+
+$string = Str::of('  Laravel  ')->trim();
+
+// 'Laravel'
+
+$string = Str::of('/Laravel/')->trim('/');
+
+// 'Laravel'
+
+ucfirst
+Метод ucfirst возвращает заданную строку с заглавными буквами:
+use Illuminate\Support\Str;
+
+$string = Str::of('foo bar')->ucfirst();
+
+// Foo bar
+
+upper
+upper метод преобразует данную строку в верхний регистр:
+use Illuminate\Support\Str;
+
+$adjusted = Str::of('laravel')->upper();
+
+// LARAVEL
+
+when
+Метод when вызывает заданное замыкание, если заданное условие истинно. Closure получит свободный экземпляр строки:
+use Illuminate\Support\Str;
+
+$string = Str::of('Taylor')
+                ->when(true, function ($string) {
+                    return $string->append(' Otwell');
+                });
+
+// 'Taylor Otwell'
+При необходимости вы можете передать другое Closure в качестве третьего параметра метода when. Это закрытие будет выполнено, если параметр условия оценивается как ложь.
+
+
+whenEmpty
+Метод whenEmpty вызывает данное закрытие, если строка пуста. Если Closure возвращает значение, это значение также будет возвращено методом whenEmpty. Если Closure не возвращает значение, будет возвращен свободный экземпляр строки:
+use Illuminate\Support\Str;
+
+$string = Str::of('  ')->whenEmpty(function ($string) {
+    return $string->trim()->prepend('Laravel');
+});
+
+// 'Laravel'
+
+words
+Метод words ограничивает количество слов в строке:
+use Illuminate\Support\Str;
+
+$string = Str::of('Perfectly balanced, as all things should be.')->words(3, ' >>>');
+
+// Perfectly balanced, as >>>
+
+
+
+URL-адреса
+action
+
+Сгенерировать URL для заданного действия контроллера.
+$url = action([HomeController::class, 'index']);
+Если метод принимает параметры маршрута, вы можете передать их вторым аргументом:
+$url = action([UserController::class, 'profile'], ['id' => 1]);
+
+asset()
+asset
+
+Сгенерировать URL к ресурсу (изображению и пр.) на основе текущей схемы запроса (HTTP или HTTPS):
+
+$url = asset('img/photo.jpg');
+Вы можете настроить хост URL ресурса, установив переменную ASSET_URL в вашем файле .env. Это может быть полезно, если вы размещаете свои активы на внешнем сервисе, таком как Amazon S3:
+// ASSET_URL=http://example.com/assets
+
+$url = asset('img/photo.jpg'); // http://example.com/assets/img/photo.jpg
+
+route()
+Функция route генерирует URL-адрес для заданного именованного маршрута:
+$url = route('routeName');
+Если маршрут принимает параметры, вы можете передать их в качестве второго аргумента метода:
+$url = route('routeName', ['id' => 1]);
+По умолчанию функция route генерирует абсолютный URL. Если вы хотите сгенерировать относительный URL-адрес, вы можете передать false в качестве третьего аргумента
+$url = route('routeName', ['id' => 1], false);
+
+secure_asset()
+Функция secure_asset генерирует URL-адрес ресурса с использованием HTTPS:
+$url = secure_asset('img/photo.jpg');
+
+secure_url()
+Функция secure_url генерирует полный URL-адрес HTTPS для указанного пути:
+$url = secure_url('user/profile');
+
+$url = secure_url('user/profile', [1]);
+
+url()
+Функция url генерирует полный URL-адрес по заданному пути:
+$url = url('user/profile');
+
+$url = url('user/profile', [1]);
+Если путь не указан, возвращается экземпляр Illuminate \ Routing \ UrlGenerator:
+$current = url()->current();
+
+$full = url()->full();
+
+$previous = url()->previous();
+
+Прочее
++ 5.3
+
+добавлено в 5.3 (28.01.2017)
+abort
+
+Выбросить HTTP-исключение, которое будет отображено обработчиком исключений:
+
+abort(401);
+
+Вы можете передать текст для вывода при ответе с этим исключением:
+abort(403, 'Unauthorized.', $headers);
+
+abort_if()
+Выбросить HTTP-исключение, если заданное логическое выражение равно true:
+
+abort_if(! Auth::user()->isAdmin(), 403);
+Как и в случае с методом abort, вы также можете предоставить текст ответа исключения в качестве третьего аргумента и массив настраиваемых заголовков ответа в качестве четвертого аргумента.
+
+abort_unless()
+Выбросить HTTP-исключение, если заданное логическое выражение равно false:
+
+abort_unless(Auth::user()->isAdmin(), 403);
+
+159 / 5000
+Результаты перевода
+Как и в случае с методом прерывания, вы также можете предоставить текст ответа исключения в качестве третьего аргумента и массив настраиваемых заголовков ответа в качестве четвертого аргумента.
+
+app()
+Функция app возвращает экземпляр контейнера службы:
+$container = app();
+Вы можете передать имя класса или интерфейса, чтобы разрешить его из контейнера:
+$api = app('HelpSpot\API');
+
+auth()
+Функция auth() возвращает экземпляр аутентификатора. Вы можете использовать её вместо фасада Auth для удобства:
+PHP
+
+$user = auth()->user();
+
+При необходимости вы можете указать, к какому экземпляру защиты вы хотите получить доступ:
+$user = auth('admin')->user();
+
+back()
+Функция back() создаёт отклик-переадресацию на предыдущую страницу:
+return back($status = 302, $headers = [], $fallback = false);
+return back();
+
+bcrypt()
+bcrypt
+
+Функция bcrypt() хеширует переданное значение с помощью Bcrypt. Вы можете использовать её вместо фасада Hash:
+PHP
+
+$password = bcrypt('my-secret-password');
+
+
+blank()
+blank функция возвращает, является ли данное значение «пустым»:
+blank('');
+blank('   ');
+blank(null);
+blank(collect());
+
+// true
+
+blank(0);
+blank(true);
+blank(false);
+
+// false
+For the inverse of blank, see the filled method.
+
+
+broadcast()
+Функция broadcast транслирует данное событие своим слушателям:
+broadcast(new UserRegistered($user));
+
+cache()
+Функция cache может использоваться для получения значений из кеша. Если данный ключ не существует в кеше, будет возвращено необязательное значение по умолчанию:
+$value = cache('key');
+
+$value = cache('key', 'default');
+Вы можете добавлять элементы в кеш, передавая в функцию массив пар ключ / значение. Вы также должны передать количество секунд или продолжительность, в течение которых кешируемое значение должно считаться действительным:
+cache(['key' => 'value'], 300);
+
+cache(['key' => 'value'], now()->addSeconds(10));
+
+class_uses_recursive()
+Функция class_uses_recursive возвращает все признаки, используемые классом, включая признаки, используемые всеми его родительскими классами:
+$traits = class_uses_recursive(App\Models\User::class);
+
+collect()
+collect
+
+Функция collect() создаёт экземпляр коллекции из переданного массива:
+
+$collection = collect(['taylor', 'abigail']);
+
+config
+
+Функция config() получает значение переменной из конфигурации. К значениям конфигурации можно обращаться с помощью «точечного» синтаксиса, в котором указывается имя файла и необходимый параметр. Можно указать значение по умолчанию, которое будет возвращено, если параметра не существует:
+
+$value = config('app.timezone');
+
+$value = config('app.timezone', $default);
+
+Функцию config() можно использовать для задания переменных конфигурации во время выполнения, передав массив пар ключ/значение:
+PHP
+
+config(['app.debug' => true]);
+
+
+cookie()
+Функция cookie создает новый экземпляр cookie:
+$cookie = cookie('name', 'value', $minutes);
+
+csrf_field()
+Функция csrf_field() создаёт скрытое поле ввода HTML, содержащее значение CSRF-последовательности. Например, используя синтаксис Blade:
+{{ csrf_field() }}
+
+csrf_token()
+Функция csrf_token извлекает значение текущего токена CSRF: Получить текущее значение CSRF-последовательности.
+$token = csrf_token();
+
+dd()
+dd
+
+Вывести дамп переменных и завершить выполнение скрипта.
+
+dd($value);
+
+dd($value1, $value2, $value3, ...);
+
++ 5.2
+
+добавлено в 5.2 (08.12.2016)
+
+Если вы не хотите останавливать выполнение скрипта, используйте функцию dump():
+
+dump($value);
+
+dispatch
+
+Поместить новую задачу в очередь задач Laravel:
+
+dispatch(new App\Jobs\SendEmails);
+
+
+dispatch_now()
+Функция dispatch_now немедленно запускает данное задание и возвращает значение из своего метода handle:
+$result = dispatch_now(new App\Jobs\SendEmails);
+
+dump()
+Функция dump сбрасывает заданные переменные:
+dump($value);
+
+dump($value1, $value2, $value3, ...);
+Если вы хотите остановить выполнение сценария после сброса переменных, используйте вместо этого функцию dd.
+
+
+env
+
+Получить значение переменной среды или вернуть значение по умолчанию.
+PHP
+
+$env = env('APP_ENV');
+
+// Возврат значения по умолчанию, если переменная не существует...
+$env = env('APP_ENV', 'production');
+Если вы выполняете команду config: cache во время процесса развертывания, вы должны быть уверены, что вызываете функцию env только из ваших файлов конфигурации. После кэширования конфигурации файл .env не будет загружен, и все вызовы функции env вернут значение null.
+
+
+event
+Отправить указанное событие его слушателям:
+event(new UserRegistered($user));
+
+
+filled()
+filled функция возвращает, не является ли данное значение «пустым»:
+filled(0);
+filled(true);
+filled(false);
+
+// true
+
+filled('');
+filled('   ');
+filled(null);
+filled(collect());
+
+// false
+For the inverse of filled, see the blank method.
+
+info
+Записать информацию в журнал (log):
+info('Некая полезная информация!');
+В функцию можно передать массив контекстных данных:
+info('Неудачная попытка входа пользователя.', ['id' => $user->id]);
+
+logger
+
+Записать в журнал сообщение уровня «debug»:
+
+logger('Отладочное сообщение');
+
+В функцию можно передать массив контекстных данных:
+
+logger('Вход пользователя.', ['id' => $user->id]);
+
+Если в функцию не переданы значения, будет возвращён экземпляр логгера:
+
+logger()->error('Вам сюда нельзя.');
+
+
+method_field
+
+Функция method_field() создаёт скрытое поле ввода HTML, содержащее подменённое значение HTTP-типа формы. Например, используя синтаксис Blade:
+<form method="POST">
+    {{ method_field('DELETE') }}
+</form>
+
+now()
+Функция now создает новый экземпляр Illuminate \ Support \ Carbon для текущего времени:
+$now = now();
+
+old()
+Функция old() получает значение «старого» ввода, переданного в сессию:
+
+$value = old('value');
+
+$value = old('value', 'default');
+
+
+optional()
+optional функция принимает любой аргумент и позволяет вам получать доступ к свойствам или вызывать методы этого объекта. Если данный объект имеет значение null, свойства и методы будут возвращать значение null вместо того, чтобы вызывать ошибку:
+return optional($user->address)->street;
+{!! old('name', optional($user)->name) !!}
+optional функция также принимает закрытие в качестве второго аргумента. Закрытие будет вызвано, если значение, указанное в качестве первого аргумента, не равно нулю:
+return optional(User::find($id), function ($user) {
+    return $user->name;
+});
+
+policy()
+Метод policy извлекает экземпляр политики для данного класса:
+
+redirect()
+Функция redirect() возвращает HTTP-отклик переадресации, или экземпляр переадресатора, если вызывается без аргументов:
+return redirect($to = null, $status = 302, $headers = [], $secure = null);
+
+return redirect('/home');
+
+return redirect()->route('route.name');
+
+report()
+Функция report сообщит об исключении, используя ваш обработчик исключений:
+report($e);
+
+request()
+Функция request() возвращает экземпляр текущего запроса или получает элемент ввода:
+$request = request();
+
+$value = request('key', $default);
+
+rescue()
+Функция rescue выполняет данное Замыкание и перехватывает любые исключения, возникающие во время его выполнения. Все перехваченные исключения будут отправлены вашему обработчику исключений; однако запрос продолжит обработку:
+return rescue(function () {
+    return $this->method();
+});
+Вы также можете передать второй аргумент функции rescue. Этот аргумент будет значением "по умолчанию", которое должно быть возвращено, если во время выполнения Closure возникает исключение:
+return rescue(function () {
+    return $this->method();
+}, false);
+
+return rescue(function () {
+    return $this->method();
+}, function () {
+    return $this->failure();
+});
+
+resolve()
+Функция resolve разрешает данный класс или имя интерфейса в его экземпляр, используя контейнер службы:
+$api = resolve('HelpSpot\API');
+
+response
+Функция response() создаёт экземпляр отклика или получает экземпляр фабрики откликов:
+return response('Hello World', 200, $headers);
+return response()->json(['foo' => 'bar'], 200, $headers);
+
+retry()
+Функция retry пытается выполнить данный обратный вызов, пока не будет достигнут заданный максимальный порог попытки. Если обратный вызов не вызывает исключения, возвращается его возвращаемое значение. Если обратный вызов вызывает исключение, он будет автоматически повторен. Если максимальное количество попыток превышено, будет выдано исключение:
+return retry(5, function () {
+    // Attempt 5 times while resting 100ms in between attempts...
+}, 100);
+
+session()
+Функция session() используется для получения или задания значений сессии:
+
+$value = session('key');
+
+Вы можете задать значения, передав массив пар ключ/значение в функцию:
+
+session(['chairs' => 7, 'instruments' => 3]);
+
+Если в функцию не было передано значение, то она вернёт значения сессии:
+
+$value = session()->get('key');
+
+session()->put('key', $value);
+
+
+tap()
+Функция tap принимает два аргумента: произвольное значение $ и закрытие. Значение $ будет передано в Closure, а затем будет возвращено функцией tap. Возвращаемое значение Closure не имеет значения:
+$user = tap(User::first(), function ($user) {
+    $user->name = 'taylor';
+
+    $user->save();
+});
+Если в функцию tap не передается закрытие, вы можете вызвать любой метод для данного значения $. Возвращаемое значение метода, который вы вызываете, всегда будет $ value, независимо от того, что метод фактически возвращает в своем определении. Например, метод update Eloquent обычно возвращает целое число. Однако мы можем заставить метод вернуть саму модель, связав вызов метода update через функцию tap:
+$user = tap($user)->update([
+    'name' => $name,
+    'email' => $email,
+]);
+Чтобы добавить в класс метод tap, вы можете добавить в класс черту Illuminate \ Support \ Traits \ Tappable. Метод tap этой черты принимает закрытие как единственный аргумент. Сам экземпляр объекта будет передан Closure, а затем будет возвращен методом tap:
+
+return $user->tap(function ($user) {
+    //
+});
+
+throw_if()
+Функция throw_if генерирует данное исключение, если данное логическое выражение имеет значение true:
+throw_if(! Auth::user()->isAdmin(), AuthorizationException::class);
+
+throw_if(
+    ! Auth::user()->isAdmin(),
+    AuthorizationException::class,
+    'You are not allowed to access this page'
+);
+
+throw_unless()
+Функция throw_unless генерирует данное исключение, если данное логическое выражение оценивается как false:
+throw_unless(Auth::user()->isAdmin(), AuthorizationException::class);
+
+throw_unless(
+    Auth::user()->isAdmin(),
+    AuthorizationException::class,
+    'You are not allowed to access this page'
+);
+
+today()
+Функция today создает новый экземпляр Illuminate \ Support \ Carbon для текущей даты:
+$today = today();
+
+trait_uses_recursive()
+Функция trait_uses_recursive возвращает все признаки, используемые признаком:
+$traits = trait_uses_recursive(\Illuminate\Notifications\Notifiable::class);
+
+transform()
+Функция transform выполняет Closure для данного значения, если значение не пустое, и возвращает результат Closure:
+$callback = function ($value) {
+    return $value * 2;
+};
+
+$result = transform(5, $callback);
+
+// 10
+Значение по умолчанию или Closure также можно передать в качестве третьего параметра метода. Это значение будет возвращено, если заданное значение пустое:
+$result = transform(null, $callback, 'The value is blank');
+
+// The value is blank
+
+validator()
+Функция validator создает новый экземпляр валидатора с заданными аргументами. Вы можете использовать его вместо фасада Validator для удобства:
+$validator = validator($data, $rules, $messages);
+
+value()
+value
+
+Если переданное значение — функция-замыкание, то вызвать её и вернуть результат. В противном случае вернуть само значение.
+$result = value(true);
+
+// true
+
+$result = value(function () {
+    return false;
+});
+
+// false
+
+view()
+view
+
+Получить экземпляр представления:
+
+return view('auth.login');
+
+
+with
+Функция with возвращает заданное значение. Если Closure передается в качестве второго аргумента функции, Closure будет выполнено, и его результат будет возвращен:
+$callback = function ($value) {
+    return (is_numeric($value)) ? $value * 2 : 0;
+};
+
+$result = with(5, $callback);
+
+// 10
+
+$result = with(null, $callback);
+
+// 0
+
+$result = with(5, null);
+
+// 5
+    </div>
+    <div class="theme">
+        <h2 class="theme__title">
+            HTTP Client
+        </h2>
+
+Laravel предоставляет выразительный минимальный API-интерфейс для HTTP-клиента Guzzle, позволяющий быстро выполнять исходящие HTTP-запросы для связи с другими веб-приложениями. Обертка Laravel вокруг Guzzle сосредоточена на наиболее распространенных вариантах использования и дает прекрасные возможности для разработчиков.
+
+Прежде чем начать, вы должны убедиться, что вы установили пакет Guzzle как зависимость вашего приложения. По умолчанию Laravel автоматически включает эту зависимость:
+composer require guzzlehttp/guzzle
+
+
+Делаем запросы
+Чтобы делать запросы, вы можете использовать методы get, post, put, patch и delete. Во-первых, давайте рассмотрим, как сделать базовый запрос GET:
+use Illuminate\Support\Facades\Http;
+
+$response = Http::get('http://example.com');
+Метод get возвращает экземпляр Illuminate \ Http \ Client \ Response, который предоставляет различные методы, которые можно использовать для проверки ответа:
+$response->body() : string;
+$response->json() : array|mixed;
+$response->status() : int;
+$response->ok() : bool;
+$response->successful() : bool;
+$response->failed() : bool;
+$response->serverError() : bool;
+$response->clientError() : bool;
+$response->header($header) : string;
+$response->headers() : array;
+Объект Illuminate \ Http \ Client \ Response также реализует интерфейс PHP ArrayAccess, позволяя вам получать доступ к данным ответа JSON непосредственно в ответе:
+return Http::get('http://example.com/users/1')['name'];
+
+Данные запроса
+Конечно, при использовании POST, PUT и PATCH обычно отправляются дополнительные данные с вашим запросом. Итак, эти методы принимают массив данных в качестве второго аргумента. По умолчанию данные будут отправляться с использованием типа содержимого application / json:
+$response = Http::post('http://example.com/users', [
+    'name' => 'Steve',
+    'role' => 'Network Administrator',
+]);
+
+
+Параметры запроса GET-запроса
+При выполнении запросов GET вы можете либо напрямую добавить строку запроса к URL-адресу, либо передать массив пар ключ / значение в качестве второго аргумента метода get:
+$response = Http::get('http://example.com/users', [
+    'name' => 'Taylor',
+    'page' => 1,
+]);
+
+Отправка запросов с закодированными URL-адресами
+Если вы хотите отправлять данные с использованием типа содержимого application / x-www-form-urlencoded, перед отправкой запроса следует вызвать метод asForm:
+$response = Http::asForm()->post('http://example.com/users', [
+    'name' => 'Sara',
+    'role' => 'Privacy Consultant',
+]);
+
+Отправка необработанного тела запроса
+Вы можете использовать метод withBody, если хотите предоставить необработанное тело запроса при его выполнении:
+$response = Http::withBody(
+    base64_encode($photo), 'image/jpeg'
+)->post('http://example.com/photo');
+
+
+Многостраничные запросы
+Если вы хотите отправлять файлы в виде запросов, состоящих из нескольких частей, перед отправкой запроса следует вызвать метод attach. Этот метод принимает имя файла и его содержимое. При желании вы можете указать третий аргумент, который будет считаться именем файла:
+$response = Http::attach(
+    'attachment', file_get_contents('photo.jpg'), 'photo.jpg'
+)->post('http://example.com/attachments');
+Вместо передачи необработанного содержимого файла вы также можете передать ресурс потока:
+$photo = fopen('photo.jpg', 'r');
+
+$response = Http::attach(
+    'attachment', $photo, 'photo.jpg'
+)->post('http://example.com/attachments');
+
+
+Заголовки
+Заголовки могут быть добавлены к запросам с помощью метода withHeaders. Этот метод withHeaders принимает массив пар ключ / значение:
+$response = Http::withHeaders([
+    'X-First' => 'foo',
+    'X-Second' => 'bar'
+])->post('http://example.com/users', [
+    'name' => 'Taylor',
+]);
+
+
+Аутентификация
+Вы можете указать учетные данные базовой и дайджест-аутентификации с помощью методов withBasicAuth и withDigestAuth соответственно:
+// Basic authentication...
+$response = Http::withBasicAuth('taylor@laravel.com', 'secret')->post(...);
+
+// Digest authentication...
+$response = Http::withDigestAuth('taylor@laravel.com', 'secret')->post(...);
+
+
+Жетоны на предъявителя
+Если вы хотите добавить в запрос Authorization bearer token header, вы можете использовать метод withToken:
+$response = Http::withToken('token')->post(...);
+
+
+Тайм-аут
+Метод timeout может использоваться для указания максимального количества секунд ожидания ответа:
+$response = Http::timeout(3)->get(...);
+Если заданный таймаут превышен, будет брошен экземпляр Illuminate \ Http \ Client \ ConnectionException.
+
+
+Повторные попытки
+Если вы хотите, чтобы HTTP-клиент автоматически повторял запрос при возникновении ошибки клиента или сервера, вы можете использовать метод retry. Метод retry принимает два аргумента: количество попыток выполнения запроса и количество миллисекунд, которые Laravel должен ждать между попытками:
+$response = Http::retry(3, 100)->post(...);
+Если все запросы терпят неудачу, будет брошен экземпляр Illuminate \ Http \ Client \ RequestException.
+
+
+Обработка ошибок
+В отличие от поведения Guzzle по умолчанию, клиентская оболочка HTTP Laravel не генерирует исключения при ошибках клиента или сервера (ответы серверов уровня 400 и 500). Вы можете определить, была ли возвращена одна из этих ошибок, используя successful, clientError, or serverError methods:
+// Determine if the status code was >= 200 and < 300...
+$response->successful();
+
+// Determine if the status code was >= 400...
+$response->failed();
+
+// Determine if the response has a 400 level status code...
+$response->clientError();
+
+// Determine if the response has a 500 level status code...
+$response->serverError();
+
+
+Выбрасывание исключений
+Если у вас есть экземпляр ответа и вы хотите выбросить экземпляр Illuminate \ Http \ Client \ RequestException, если ответ является ошибкой клиента или сервера, вы можете использовать метод throw:
+$response = Http::post(...);
+
+// Throw an exception if a client or server error occurred...
+$response->throw();
+
+return $response['user']['id'];
+Экземпляр Illuminate \ Http \ Client \ RequestException имеет общедоступное свойство $ response, которое позволит вам проверить возвращенный ответ.
+
+Метод throw возвращает экземпляр ответа, если ошибок не произошло, что позволяет связать другие операции с методом throw:
+return Http::post(...)->throw()->json();
+Если вы хотите выполнить некоторую дополнительную логику до создания исключения, вы можете передать Closure методу throw. Исключение будет сгенерировано автоматически после вызова Closure, поэтому вам не нужно повторно генерировать исключение из Closure:
+return Http::post(...)->throw(function ($response, $e) {
+    //
+})->json();
+
+Guzzle Options
+Вы можете указать дополнительные параметры запроса Guzzle с помощью метода withOptions. Метод withOptions принимает массив пар ключ / значение:
+$response = Http::withOptions([
+    'debug' => true,
+])->get('http://example.com/users');
+
+Тестирование
+
+Многие сервисы Laravel предоставляют функциональные возможности, которые помогут вам легко и выразительно писать тесты, и HTTP-оболочка Laravel не является исключением. Поддельный метод фасада Http позволяет указать HTTP-клиенту возвращать заглушенные / фиктивные ответы при выполнении запросов.
+
+Поддельные ответы
+
+Например, чтобы указать HTTP-клиенту возвращать пустые 200 ответов с кодом состояния для каждого запроса, вы можете вызвать fake метод без аргументов:
+use Illuminate\Support\Facades\Http;
+
+Http::fake();
+
+$response = Http::post(...);
+
+При подделке запросов промежуточное ПО HTTP-клиента не выполняется. Вы должны определить ожидания для ложных ответов, как если бы это промежуточное программное обеспечение работало правильно.
+
+
+Подделка определенных URL-адресов
+В качестве альтернативы вы можете передать массив fake методу. Ключи массива должны представлять шаблоны URL, которые вы хотите подделать, и связанные с ними ответы. Символ * может использоваться как подстановочный знак. Любые запросы к URL-адресам, которые не были подделаны, будут выполнены. Вы можете использовать метод response для создания тупиковых / поддельных ответов для этих конечных точек:
+Http::fake([
+    // Stub a JSON response for GitHub endpoints...
+    'github.com/*' => Http::response(['foo' => 'bar'], 200, ['Headers']),
+
+    // Stub a string response for Google endpoints...
+    'google.com/*' => Http::response('Hello World', 200, ['Headers']),
+]);
+Если вы хотите указать шаблон резервного URL-адреса, который заглушит все несовпадающие URL-адреса, вы можете использовать один символ *:
+Http::fake([
+    // Stub a JSON response for GitHub endpoints...
+    'github.com/*' => Http::response(['foo' => 'bar'], 200, ['Headers']),
+
+    // Stub a string response for all other endpoints...
+    '*' => Http::response('Hello World', 200, ['Headers']),
+]);
+
+Поддельные последовательности ответов
+Иногда вам может потребоваться указать, что один URL-адрес должен возвращать серию поддельных ответов в определенном порядке. Вы можете сделать это, используя метод Http :: sequence для построения ответов:
+Http::fake([
+    // Stub a series of responses for GitHub endpoints...
+    'github.com/*' => Http::sequence()
+                            ->push('Hello World', 200)
+                            ->push(['foo' => 'bar'], 200)
+                            ->pushStatus(404),
+]);
+Когда все ответы в последовательности ответов будут использованы, любые дальнейшие запросы приведут к тому, что последовательность ответов вызовет исключение. Если вы хотите указать ответ по умолчанию, который должен возвращаться, когда последовательность пуста, вы можете использовать метод whenEmpty:
+Http::fake([
+    // Stub a series of responses for GitHub endpoints...
+    'github.com/*' => Http::sequence()
+                            ->push('Hello World', 200)
+                            ->push(['foo' => 'bar'], 200)
+                            ->whenEmpty(Http::response()),
+]);
+Если вы хотите подделать последовательность ответов, но не должны указывать конкретный шаблон URL, который следует подделать, вы можете использовать метод Http :: fakeSequence:
+Http::fakeSequence()
+        ->push('Hello World', 200)
+        ->whenEmpty(Http::response());
+
+Поддельный обратный звонок
+Если вам требуется более сложная логика, чтобы определить, какие ответы возвращать для определенных конечных точек, вы можете передать обратный вызов fake методу. Этот обратный вызов получит экземпляр Illuminate \ Http \ Client \ Request и должен вернуть экземпляр ответа:
+Http::fake(function ($request) {
+    return Http::response('Hello World', 200);
+});
+
+Проверка запросов
+
+При подделке ответов вы можете иногда захотеть проверить запросы, которые получает клиент, чтобы убедиться, что ваше приложение отправляет правильные данные или заголовки. Это можно сделать, вызвав метод Http :: assertSent после вызова Http :: fake.
+
+Метод assertSent принимает обратный вызов, которому будет предоставлен экземпляр Illuminate \ Http \ Client \ Request, и он должен вернуть логическое значение, указывающее, соответствует ли запрос вашим ожиданиям. Для успешного прохождения теста должен быть выдан хотя бы один запрос, соответствующий заданным ожиданиям:
+Http::fake();
+
+Http::withHeaders([
+    'X-First' => 'foo',
+])->post('http://example.com/users', [
+    'name' => 'Taylor',
+    'role' => 'Developer',
+]);
+
+Http::assertSent(function ($request) {
+    return $request->hasHeader('X-First', 'foo') &&
+           $request->url() == 'http://example.com/users' &&
+           $request['name'] == 'Taylor' &&
+           $request['role'] == 'Developer';
+});
+При необходимости вы можете утверждать, что конкретный запрос не был отправлен с помощью метода assertNotSent:
+Http::fake();
+
+Http::post('http://example.com/users', [
+    'name' => 'Taylor',
+    'role' => 'Developer',
+]);
+
+Http::assertNotSent(function (Request $request) {
+    return $request->url() === 'http://example.com/posts';
+});
+Или, если вы хотите подтвердить, что запросы не были отправлены, вы можете использовать метод assertNothingSent:
+Http::fake();
+
+Http::assertNothingSent();
+    </div>
+    <div class="theme">
+        <h2 class="theme__title">
+            Работа с e-mail
+        </h2>
+Laravel предоставляет простой API к популярной библиотеке SwiftMailer с драйверами для SMTP, Mailgun, SparkPost, Amazon SES, PHP-функций mail и sendmail, поэтому вы можете быстро приступить к рассылке почты с помощью локального или облачного сервиса на ваш выбор.
+
+Настройка
+Почтовые службы Laravel можно настроить с помощью файла конфигурации mail. Каждая почтовая программа, настроенная в этом файле, может иметь свои собственные параметры и даже свой собственный уникальный «транспорт», что позволяет вашему приложению использовать различные почтовые службы для отправки определенных электронных сообщений. Например, ваше приложение может использовать Postmark для отправки транзакционной почты, а Amazon SES - для массовых рассылок.
+
+
+Требования для драйверов
+
+Основанные на API драйвера, такие как Mailgun и Postmark, часто гораздо проще и быстрее, чем SMTP-серверы. Вам следует использовать один из таких драйверов, если это возможно. Для работы таких драйверов необходимо, чтобы в вашем приложении была установлена HTTP-библиотека Guzzle, которую можно установить через менеджер пакетов Composer:
+
+composer require guzzlehttp/guzzle
+
+Драйвер Mailgun
+
+Для использования драйвера Mailgun установите Guzzle и задайте для параметра driver в конфиге config/mail.php значение mailgun. Затем проверьте, что в конфиге config/services.php содержатся следующие параметры:
+'mailgun' => [
+    'domain' => env('MAILGUN_DOMAIN'),
+    'secret' => env('MAILGUN_SECRET'),
+],
+Если вы не используете регион Mailgun «США», вы можете определить конечную точку своего региона в файле конфигурации services:
+'mailgun' => [
+    'domain' => env('MAILGUN_DOMAIN'),
+    'secret' => env('MAILGUN_SECRET'),
+    'endpoint' => env('MAILGUN_ENDPOINT', 'api.eu.mailgun.net'),
+],
+Postmark Driver
+Чтобы использовать драйвер Postmark, установите транспорт Postmark SwiftMailer через Composer:
+composer require wildbit/swiftmailer-postmark
+Затем установите Guzzle и установите параметр default в конфигурационном файле config / mail.php на postmark. Наконец, убедитесь, что ваш файл конфигурации config / services.php содержит следующие параметры:
+'postmark' => [
+    'token' => env('POSTMARK_TOKEN'),
+],
+Драйвер SES
+
+Чтобы использовать драйвер Amazon SES, установите Amazon AWS SDK для PHP. Вы можете установить эту библиотеку, добавив следующую строку в раздел require файла composer.json и выполнив команду composer update:
+
+"aws/aws-sdk-php": "~3.0"
+
+Затем задайте для параметра driver в конфиге config/mail.php значение ses и проверьте, что в файле config/services.php содержатся следующие параметры:
+'ses' => [
+    'key' => env('AWS_ACCESS_KEY_ID'),
+    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+    'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+],
+Если вам нужно включить дополнительные параметры при выполнении запроса SES SendRawEmail, вы можете определить массив options в своей конфигурации ses:
+
+'ses' => [
+    'key' => env('AWS_ACCESS_KEY_ID'),
+    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+    'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    'options' => [
+        'ConfigurationSetName' => 'MyConfigurationSet',
+        'Tags' => [
+            [
+                'Name' => 'foo',
+                'Value' => 'bar',
+            ],
+        ],
+    ],
+],
+
+Генерация Mailables
+
+В Laravel каждый тип email-сообщений, отправляемых вашим приложением, представлен классом "mailable". Эти классы хранятся в директории app/Mail. Не волнуйтесь, если не видите этту директорию в своем приложении, так как она будет сгенерирована когда вы создадите первый подобный класс, используя командуmake:mail:
+
+php artisan make:mail OrderShipped
+
+Написание Mailables
+
+Настройка класса mailable выполняется в методе build. В рамках этого метода можно вызвать различные методы, такие как from, subject, view и attach для настройки самого электронного письма и его доставки.
+Настройка отправителя
+Использование метода from
+
+Сначала давайте рассмотрим настройку отправителя электронных писем. Или, другими словами, кто будет указан в поле отправителя - "from". Есть два способа настройки отправителя. Во-первых, можно использовать метод from внутри вашего метода mailable-класса build:
+
+/**
+ * Построение сообщения.
+ *
+ * @return $this
+ */
+public function build()
+{
+    return $this->from('example@example.com')
+                ->view('emails.orders.shipped');
+}
+
+Использование глобального адреса from
+
+Однако, если ваше приложение использует один и тот же адрес "from" во всех своих письмах, будет довольно утомительно вызывать метод from в каждом генерируемом классе mailable. Вместо этого можно указать глобальный адрес "from" в конфиге config/mail.php. Этот адрес будет использоваться, если больше не указан ни один адрес "from" в классе mailable:
+
+'from' => ['address' => 'example@example.com', 'name' => 'App Name'],
+Кроме того, вы можете определить глобальный адрес «reply_to» в файле конфигурации config / mail.php:
+'reply_to' => ['address' => 'example@example.com', 'name' => 'App Name'],
+
+Настройка шаблона
+
+В методе build mailable-класса можно использовать метод view, чтобы указать какой шаблон следует использовать при визуальном представлении содержимого этого email-сообщения. Как как каждый email обычно использует шаблон Blade для представления своего содержимого, в вашем распоряжении будет вся мощь и удобство движка обработки шаблонов Blade при построении HTML вашего электронного сообщения:
+
+/**
+ * Построение сообщения.
+ *
+ * @return $this
+ */
+public function build()
+{
+    return $this->view('emails.orders.shipped');
+}
+
+    Возможно, вы захотите создать директорию resources/views/emails, чтобы разместить все свои email-шаблоны; тем не менее, вы можете размещать их где угодно внутри своей директории resources/views.
+
+Email-сообщения без форматирования
+
+Если вы хотите определить версию своего email без форматирования, то можно использовать метод text. Как и метод view, метод text принимает имя шаблона, который будет использоваться для визуального представления содержимого письма. Вы свободно можете определить и HTML-версию и версию без форматирования своего сообщения:
+
+/**
+ * Build the message.
+ *
+ * @return $this
+ */
+public function build()
+{
+    return $this->view('emails.orders.shipped')
+                ->text('emails.orders.shipped_plain');
+}
+
+Данные шаблона
+Через общедоступные свойства
+
+Как правило, вы захотите передать некоторые данные своему шаблону, которые можно использовать при визуальном отображении электронного сообщения в виде HTML. Существует два способа, благодаря которым можно сделать данные доступными для вашего шаблона. Первый: любое общедоступное свойство, определенное в вашем классе mailable, можно автоматически сделать доступным для шаблона. Поэтому, к примеру, вы можете передать данные своему конструктору класса mailable и изменить данные на общедоступные свойства, определенные в классе:
+
+
+namespace App\Mail;
+
+use App\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    /**
+     * The order instance.
+     *
+     * @var Order
+     */
+    public $order;
+
+    /**
+     * Создать новый экземпляр сообщения.
+     *
+     * @return void
+     */
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
+
+    /**
+     * Построить сообщение.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.orders.shipped');
+    }
+}
+
+Как только данные были заменены на общедоступные свойства, они станут автоматически доступными для вашего шаблона - вы сможете получать к ним доступ так же, как и к любым другим данным в ваших шаблонах Blade:
+
+<div>
+    Price: {{ $order->price }}
+</div>
+
+Через метод with:
+
+Если вы хотите изменить формат данных своего e-mail сообщения, прежде чем они будут отправлены шаблону, вы можете вручную передать данные шаблону через метод with. Как правило, вы все еще будете передавать данные через контруктор класса mailable; однако, вы должны задать свойства данных protected или private, чтобыд данные не были автоматически доступны шаблону. Тогда во время вызова метода with нужно передать массив данных, которые вы хотите сделать доступным для шаблона:
+
+
+namespace App\Mail;
+
+use App\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    /**
+     * The order instance.
+     *
+     * @var Order
+     */
+    protected $order;
+
+    /**
+     * Создать новый экземпляр сообщения.
+     *
+     * @return void
+     */
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.orders.shipped')
+                    ->with([
+                        'orderName' => $this->order->name,
+                        'orderPrice' => $this->order->price,
+                    ]);
+    }
+}
+
+Как только данные были переданы методу with, они автоматически будут доступны в вашем шаблоне - вы сможете получить к ним доступ точно так же, как и к любым другим данным в своих шаблонах Blade:
+
+<div>
+    Price: {{ $orderPrice }}
+</div>
+
+Вложения
+
+Чтобы добавить вложение к электронному сообщению, используйте метод attach в методе mailable-класса build. В качестве первого аргумента метод attach принимает полный путь к файлу:
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.orders.shipped')
+                    ->attach('/path/to/file');
+    }
+
+Во время присоединения файлов к сообщению, вы также можете указать отображаемое имя и / или MIME-тип, передав array в качестве второго аргумента методу attach:
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.orders.shipped')
+                    ->attach('/path/to/file', [
+                        'as' => 'name.pdf',
+                        'mime' => 'application/pdf',
+                    ]);
+    }
+
+Прикрепление файлов с диска
+
+Если вы сохранили файл на одном из дисков файловой системы, вы можете прикрепить его к электронному письму с помощью метода attachFromStorage:
+/**
+ * Build the message.
+ *
+ * @return $this
+ */
+public function build()
+{
+   return $this->view('emails.orders.shipped')
+               ->attachFromStorage('/path/to/file');
+}
+При необходимости вы можете указать имя вложения файла и дополнительные параметры, используя второй и третий аргументы метода attachFromStorage:
+/**
+ * Build the message.
+ *
+ * @return $this
+ */
+public function build()
+{
+   return $this->view('emails.orders.shipped')
+               ->attachFromStorage('/path/to/file', 'name.pdf', [
+                   'mime' => 'application/pdf'
+               ]);
+}
+Метод attachFromStorageDisk можно использовать, если вам нужно указать диск хранения, отличный от диска по умолчанию:
+/**
+ * Build the message.
+ *
+ * @return $this
+ */
+public function build()
+{
+   return $this->view('emails.orders.shipped')
+               ->attachFromStorageDisk('s3', '/path/to/file');
+}
+
+Вложения с сырыми данными
+
+Метод attachData можно использовать для присоединения сырой строки байтов в качестве вложения. Например, вы можете использовать этот метод, если сгенерировали PDF в памяти и хотите присоединить его к электронному письму без записи на диск. Метод attachData принимает байты сырых данных в качестве первого аргумента, имя файла - в качестве второго аргумента, а массив опций - в качестве третьего:
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.orders.shipped')
+                    ->attachData($this->pdf, 'name.pdf', [
+                        'mime' => 'application/pdf',
+                    ]);
+    }
+
+Встроенные вложения
+
+Обычно добавление встроенных вложений — утомительное занятие, однако Laravel делает его проще, позволяя вам добавлять изображения и получать соответствующие CID. Для вставки встроенного изображения используйте метод embed на переменной $message в вашем email-шаблоне. Laravel автоматически делает переменную $message доступной для всех ваших email-шаблонов, так что вам не нужно волноваться о том, чтобы передать ее вручную:
+
+<body>
+    Вот изображение:
+
+    <img src="{{ $message->embed($pathToFile) }}">
+</body>
+
+    Переменная $message недоступна в markdown-сообщениях.
+
+Встроенные вложения с сырыми данными
+
+Если у вас уже есть строка с сырыми данными, которую вы хотите встроить в шаблон электронного сообщения, можно использовать метод embedData на переменной $message:
+
+<body>
+    Вот изображение из сырых данных:
+
+    <img src="{{ $message->embedData($data, $name) }}">
+</body>
+
+Настройка сообщения SwiftMailer
+
+Метод withSwiftMessage базового класса Mailable позволяет вам зарегистрировать анонимную функцию, которая будет вызываться экземпляром сообщения SwiftMailer перед отправкой сообщения. Это дает вам возможность кастомизировать сообщение перед тем как оно будет доставлено:
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        $this->view('emails.orders.shipped');
+
+        $this->withSwiftMessage(function ($message) {
+            $message->getHeaders()
+                    ->addTextHeader('Custom-Header', 'HeaderValue');
+        });
+    }
+
+Markdown Mailables
+
+Mailable-сообщения в формате Markdown позволяют вам воспользоваться предварительно собранными шаблонами и компонентами почтовых уведомлений в ваших mailables. Так как сообщения написаны в формате Markdown, Laravel способен отображать красивые, отзывчивые HTML-шаблоны сообщений, в то же время генерируя идентичную копию без форматирования (только текст).
+Генерация Markdown Mailables
+
+Чтобы сгенерировать mailable с соответствующим Markdown можно использовать опцию --markdown Artisan-команды make:mail:
+
+php artisan make:mail OrderShipped --markdown=emails.orders.shipped
+
+Тогда при настройке mailable в своем методе build, вызовите метод markdown вместо метода view. Метод markdown принимает имя Markdown-шаблона в качестве необязательного массива данных, который затем делает доступным для шаблона:
+
+/**
+ * Build the message.
+ *
+ * @return $this
+ */
+public function build()
+{
+    return $this->from('example@example.com')
+                ->markdown('emails.orders.shipped');
+}
+
+Написание Markdown-сообщений
+
+Markdown mailable-сообщения используют комбинацию Blade-компонентов и синтаксиса Markdown, что позволяет вам довольно просто конструировать почтовые сообщения, используя заранее созданные компоненты Laravel:
+
+@component('mail::message')
+# Заказ отправлен
+
+Ваш заказ был отправлен!
+
+@component('mail::button', ['url' => $url])
+Просмотреть заказ
+@endcomponent
+
+Спасибо,<br>
+{{ config('app.name') }}
+@endcomponent
+
+    Не используйте чрезмерное количество отступов во время написания Markdown-сообщений. Markdown парсеры выполнят содержимое с отступом в виде блоков кода.
+
+Компонент Button (кнопка)
+
+Компонент кнопки отображает отцентрованную ссылку-кнопку. Этот компонент принимает два аргумента: url и необязательный color. Поддерживаются цвета: blue (синий), green (зеленый) и red (красный). Вы можете добавить сколько угодно компонентов-кнопок в свое сообщение:
+
+@component('mail::button', ['url' => $url, 'color' => 'green'])
+Просмотреть заказ
+@endcomponent
+
+Компонент Panel (область)
+
+Компонент panel отображает заданный блок текста в области с цветом фона, слегка отличающимся от заднего фона самого сообщения. Это позволяет привлечь внимание к данной области текста:
+
+@component('mail::panel')
+This is the panel content.
+@endcomponent
+
+Компонента Table (таблица)
+
+Компонент table позволяет трансформировать Markdown-таблицу в HTML-таблицу. Этот компонент принимает Markdown-таблицу в качестве содержимого. Поддерживается выравнивание столбцов с использованием синтаксиса выравнивания в Markdown таблицах по умолчанию:
+
+@component('mail::table')
+| Laravel       | Table         | Example  |
+| ------------- |:-------------:| --------:|
+| Col 2 is      | Centered      |      $10 |
+| Col 3 is      | Right-Aligned |      $20 |
+@endcomponent
+
+Настройка компонентов
+
+Вы можете экспортировать все Markdown-компоненты почты в собственное приложение, чтобы настроить их. Чтобы экспортировать: используйте Artisan-команду vendor:publish, чтобы опубликовать ассет-тэг laravel-mail:
+
+php artisan vendor:publish --tag=laravel-mail
+
+Эта команда опубликует Markdown-компоненты почты в директорию resources/views/vendor/mail. Директория mail будет содержать директорию html и markdown, каждая из которых содержит соответсвующие представления каждого доступного компонента. Вы можете свободно настраивать эти компоненты по собственному усмотрению.
+Настройка CSS
+
+После экспорта компонентов в директории resources/views/vendor/mail/html/themes будет содержаться файл default.css. Вы можете настроить CSS в этом файле, и ваши стили будут автоматически приведены в соответствие с HTML-представлениями ваших Markdown-сообщений.
+
+Если вы хотите собрать полностью новую тему для Markdown-кмпонентов, просто напишите новый CSS-файл в директории html/themes и измените параметр theme в конфиге mail.
+
+Если вы хотите создать совершенно новую тему для компонентов Laravel Markdown, вы можете поместить файл CSS в каталог html / themes. После присвоения имени и сохранения файла CSS обновите параметр темы в файле конфигурации почты, чтобы он соответствовал имени вашей новой темы.
+
+Чтобы настроить тему для отдельного почтового сообщения, вы можете установить для свойства $ theme класса mailable имя темы, которое следует использовать при отправке этого почтового сообщения.
+
+Отправка почты
+
+Используйте метод to фасада Mail, чтобы отправить сообщение. Метод to принимает адрес email, экземпляр пользователя или коллекцию пользователей. Если вы передаете объект или коллекцию объектов, почтовая программа будет автоматически использовать их свойства email и name при настройке получателей электронного сообщения, поэтому убедитесь, что у ваших объектов есть эти атрибуты. Как только вы указали получателей, вы можете передать экземпляр своего класса mailable методу send:
+
+
+
+namespace App\Http\Controllers;
+
+use App\Order;
+use App\Mail\OrderShipped;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\Controller;
+
+class OrderController extends Controller
+{
+    /**
+     * Отправить заданный заказ.
+     *
+     * @param  Request  $request
+     * @param  int  $orderId
+     * @return Response
+     */
+    public function ship(Request $request, $orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        // Отправить заказ...
+
+        Mail::to($request->user())->send(new OrderShipped($order));
+    }
+}
+
+Конечно, вы не ограничены исключительно указанием получателей в поле "to" при отправке сообщения. Также можно указать и получателей "to", "cc" и "bcc" - всех в одном связанном вызове метода:
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->send(new OrderShipped($order));
+
+Цикл по получателям
+
+Иногда вам может потребоваться отправить почтовое сообщение списку получателей, перебирая массив получателей / адресов электронной почты. Поскольку метод to добавляет адреса электронной почты в список получателей почтового сообщения, вы всегда должны повторно создавать экземпляр почтового сообщения для каждого получателя:
+foreach (['taylor@example.com', 'dries@example.com'] as $recipient) {
+    Mail::to($recipient)->send(new OrderShipped($order));
+}
+
+Отправка почты через определенный почтовый ящик
+По умолчанию Laravel будет использовать почтовую программу, настроенную как default mailer в вашем файле конфигурации mail. Однако вы можете использовать метод mailer для отправки сообщения с использованием определенной конфигурации почтовой программы:
+Mail::mailer('postmark')
+        ->to($request->user())
+        ->send(new OrderShipped($order));
+
+        Очереди отправки
+        Помещение сообщения в очередь отправки
+
+Из-за того, что отправка сообщений может сильно повлиять на время обработки запроса, многие разработчики помещают их в очередь на фоновую отправку. Laravel позволяет легко делать это, используя единое API очередей. Для помещения сообщения в очередь просто используйте метод queue фасада Mail после указания получателей сообщения:
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->queue(new OrderShipped($order));
+
+Этот метод автоматически позаботится о помещении в очередь задачи для фоновой отправки почтового сообщения. Конечно, вам нужно будет настроить механизм очередей перед использованием данной возможности.
+Задержка отправки сообщения
+
+Вы можете задержать отправку сообщения методом later. В качестве своего первого аргумента метод later принимает экземпляр DateTime, указывая когда следует отправить сообщение:
+
+$when = Carbon\Carbon::now()->addMinutes(10);
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->later($when, new OrderShipped($order));
+
+Помещение сообщения в определённую очередь
+
+Так как все mailable-классы генерируемые с использованием команды make:mail используют трейт Illuminate\Bus\Queueable, вы можете вызвать методы onQueue и onConnection в любом экземпляре класса mailable, что позволит указать имя очереди и подключение для сообщения:
+
+$message = (new OrderShipped($order))
+                ->onConnection('sqs')
+                ->onQueue('emails');
+
+Mail::to($request->user())
+    ->cc($moreUsers)
+    ->bcc($evenMoreUsers)
+    ->queue($message);
+
+Помещение в очередь по умолчанию
+
+Если у вас есть mailable-классы, которые всегда должны быть в очереди, вы можете реализовать на классе контракт ShouldQueue. Теперь даже если вы вызовете метод send при отправке почты, mailable все еще будет находится в очереди, так как он реализует контракт:
+
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class OrderShipped extends Mailable implements ShouldQueue
+{
+    //
+}
+
+Обработка почтовых сообщений
+
+Иногда вам может потребоваться захватить HTML-содержимое почтового сообщения, не отправляя его. Для этого вы можете вызвать метод render почтового сообщения. Этот метод вернет оцененное содержимое почтового сообщения в виде строки:
+$invoice = App\Models\Invoice::find(1);
+return (new App\Mail\InvoicePaid($invoice))->render();
+
+Предварительный просмотр почтовых сообщений в браузере
+
+При разработке шаблона почтового сообщения удобно быстро просмотреть визуализированное почтовое сообщение в браузере, как типичный шаблон Blade. По этой причине Laravel позволяет вам возвращать любое почтовое сообщение непосредственно из замыкания маршрута или контроллера. Когда почтовое сообщение возвращается, оно будет обработано и отображено в браузере, что позволит вам быстро просмотреть его дизайн без необходимости отправлять его на реальный адрес электронной почты:
+Route::get('mailable', function () {
+    $invoice = App\Models\Invoice::find(1);
+
+    return new App\Mail\InvoicePaid($invoice);
+});
+
+Встроенные вложения не будут отображаться при предварительном просмотре почтового сообщения в вашем браузере. Чтобы просмотреть эти рассылки, вам следует отправить их в приложение для тестирования электронной почты, такое как MailHog или HELO.
+
+
+Локализация почтовых отправлений
+
+Laravel позволяет отправлять почтовые сообщения в локали, отличной от текущего языка, и даже будет помнить этот языковой стандарт, если почта находится в очереди.
+
+Для этого фасад Mail предлагает метод locale для установки желаемого языка. Приложение изменится на этот языковой стандарт при форматировании почтового сообщения, а затем вернется к предыдущему языку после завершения форматирования:
+Mail::to($request->user())->locale('es')->send(
+    new OrderShipped($order)
+);
+
+Предпочитаемые пользователем регионы
+
+Иногда приложения хранят предпочтительный языковой стандарт каждого пользователя. Реализуя контракт HasLocalePreference на одной или нескольких ваших моделях, вы можете указать Laravel использовать этот сохраненный языковой стандарт при отправке почты:
+use Illuminate\Contracts\Translation\HasLocalePreference;
+
+class User extends Model implements HasLocalePreference
+{
+    /**
+     * Get the user's preferred locale.
+     *
+     * @return string
+     */
+    public function preferredLocale()
+    {
+        return $this->locale;
+    }
+}
+После того, как вы внедрили интерфейс, Laravel будет автоматически использовать предпочтительный языковой стандарт при отправке почтовых сообщений и уведомлений в модель. Следовательно, при использовании этого интерфейса нет необходимости вызывать метод locale:
+Mail::to($request->user())->send(new OrderShipped($order));
+
+Почта и локальная разработка
+
+При разработке приложения обычно предпочтительно отключить доставку отправляемых сообщений. В Laravel есть несколько способов "отключить" реальную отправку почтовых сообщений
+Драйвер Log
+
+Вместо отправки ваших электронных сообщений, драйвер log будет записывать все email-сообщения в ваши логи для анализа. Это полезно в первую очередь для быстрой, локальной отладки и проверки данных. Подробнее о настройке различных окружений для приложения читайте в документации по настройке.
+Универсальный получатель
+
+Другой вариант — задать универсального получателя для всех сообщений от фреймворка. при этом все сообщения, генерируемые вашим приложением, будут отсылаться на заданный адрес, вместо адреса, указанного при отправке сообщения. Это можно сделать с помощью параметра to в конфиге config/mail.php:
+
+'to' => [
+    'address' => 'example@example.com',
+    'name' => 'Example'
+],
+
+Mailtrap
+
+И, наконец, вы можете использовать сервис Mailtrap и драйвер smtp для отправки ваших почтовых сообщений на фиктивный почтовый ящик, где вы сможете посмотреть их при помощи настоящего почтового клиента. Преимущество этого вариант в том, что вы можете проверить то, как в итоге будут выглядеть ваши почтовые сообщения, при помощи средства для просмотра сообщений Mailtrap.
+
+
+События
+Laravel запускает два события в процессе отправки почтовых сообщений. Событие MessageSending запускается до отправки сообщения, а событие MessageSent запускается после отправки сообщения. Помните, что эти события запускаются, когда почта отправляется, а не когда она стоит в очереди. Вы можете зарегистрировать прослушиватель событий для этого события в своем EventServiceProvider:
+
+/**
+ * The event listener mappings for the application.
+ *
+ * @var array
+ */
+protected $listen = [
+    'Illuminate\Mail\Events\MessageSending' => [
+        'App\Listeners\LogSendingMessage',
+    ],
+    'Illuminate\Mail\Events\MessageSent' => [
+        'App\Listeners\LogSentMessage',
+    ],
+];
 
     </div>
     <div class="theme">
+        <h2 class="theme__title">
+            Уведомления
+        </h2>
+        Дополнительно к поддержке отправки email-сообщений, Laravel также поддерживает и отправку уведомлений по различным каналам доставки, включая почту, SMS (через Nexmo) и Slack. Уведомления также можно хранить в БД, поэтому их можно отображать в вашем интерфейсе.
+
+        Как правило, уведомления должны быть короткими, информативными сообщениями, которые уведомляют пользователей о каком-либо событий, произошедшем в вашем приложении. Например, если вы пишете биллинг-приложение, то можете отправлять своим пользователям уведомление об оплаченном счете через каналы email и SMS.
+        Создание уведомлений
+
+        В Laravel каждое уведомление представлено единым классом (обычно хранится в директории app/Notifications). Не волнуйтесь, если не видите эту директорию в своем приложении, т.к. она будет создана, когда вы запустите Artisan-команду make:notification:
+
+        php artisan make:notification InvoicePaid
+
+        Эта команда поместит свежий класс уведомлений в вашу директорию app/Notifications. Каждый класс уведомления содержит метод via и переменный номер методов построения сообщений (например, toMail или toDatabase), которые конвертируют уведомление в сообщение, оптимизированное для конкретного канала.
+        Отправка уведомлений
+        Использование трейта Notifiable
+
+        Уведомления можно отправлять двумя способами: используя метод notify трейта Notifiable или используя фасад Notification. Сначала давайте рассмотрим использование трейта:
+
+
+
+        namespace App;
+
+        use Illuminate\Notifications\Notifiable;
+        use Illuminate\Foundation\Auth\User as Authenticatable;
+
+        class User extends Authenticatable
+        {
+            use Notifiable;
+        }
+
+        Этот трейт используется моделью App\User по умолчанию и содержит один метод, который можно использовать для отправки уведомлений: notify. Метод notify ожидает получить экземпляр уведомления:
+
+        use App\Notifications\InvoicePaid;
+
+        $user->notify(new InvoicePaid($invoice));
+
+            Помните, что можете использовать трейт Illuminate\Notifications\Notifiable на любой своей модели. Вы не ограничены включением его только в вашу модель User.
+
+        Использование фасада Notification
+
+        Другой способ отправки уведомлений - через фасад Notification. Это полезно, прежде всего, когда вам нужно отправить уведомление нескольким уведомляемым объектам, таким как коллекция пользователей. Чтобы отправлять уведомления с использованием фасада, передайте все уведомляемые объекты и экземпляр уведомления методу send:
+
+        Notification::send($users, new InvoicePaid($invoice));
+
+        Указание каналов доставки
+
+        У каждого класса уведомлений есть метод via, который определяет по каким каналам будет доставляться это уведомление. Изначально уведомления можно отправлять на каналы mail, database, broadcast, nexmo и slack.
+
+            Если вы бы хотели использовать другие каналы доставки, такие как Telegram или Pusher, ознакомьтесь с управляемым сообществом вебсайтом о каналах уведомлений Laravel.
+
+        Метод via получает экземпляр $notifiable, который будет экземпляром класса, которому отправляется уведомление. Можно использовать $notifiable, чтобы определить по каким каналам следует доставлять уведомление:
+
+        /**
+         * Получить каналы доставки уведомления.
+         *
+         * @param  mixed  $notifiable
+         * @return array
+         */
+        public function via($notifiable)
+        {
+            return $notifiable->prefers_sms ? ['nexmo'] : ['mail', 'database'];
+        }
+
+        Формирование очередей уведомлений
+
+            Перед формированием очередей уведомлений вам следует настроить свою очередь и запустить воркер.
+
+Отправка уведомлений может занять время, особенно если каналу требуется вызывать внешний API с целью доставки этих уведомлений. Чтобы ускорить время ответа вашего приложения, позвольте своим уведомлениям формировать очереди, добавив интерфейс ShouldQueue и трейт Queueable к своему классу. Этот интерфейс и трейт уже испортированы для всех уведомлений, сгенерированных с использованием make:notification, так что вы можете сразу же добавить их к свой класс уведомлений:
+
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class InvoicePaid extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    // ...
+}
+
+Как только к вашему уведомлению был добавлен интерфейс ShouldQueue, вы можете отправлять уведомления как обычно. Laravel определит интерфейс ShouldQueue в классе и автоматически поставит доставку уведомления в очередь:
+
+$user->notify(new InvoicePaid($invoice));
+
+Если вы бы хотели отложить доставку уведомления, то можно привязать метод delay к экземпляру вашего уведомления:
+
+$when = Carbon::now()->addMinutes(10);
+
+$user->notify((new InvoicePaid($invoice))->delay($delay));
+Вы можете передать массив в метод delay, чтобы указать величину задержки для определенных каналов:
+$user->notify((new InvoicePaid($invoice))->delay([
+    'mail' => now()->addMinutes(5),
+    'sms' => now()->addMinutes(10),
+]));
+При постановке уведомлений в очередь для каждого получателя и комбинации каналов создается задание в очереди. Например, в очередь будет отправлено шесть заданий, если у вашего уведомления три получателя и два канала.
+
+
+Настройка очередей каналов уведомлений
+
+Если вы хотите указать конкретную очередь, которая должна использоваться для каждого канала уведомления, поддерживаемого уведомлением, вы можете определить метод viaQueues в своем уведомлении. Этот метод должен возвращать массив пар имя канала / имя очереди:
+**
+ * Determine which queues should be used for each notification channel.
+ *
+ * @return array
+ */
+public function viaQueues()
+{
+    return [
+        'mail' => 'mail-queue',
+        'slack' => 'slack-queue',
+    ];
+}
+
+Уведомления по запросу
+
+Иногда вам может потребоваться отправить уведомление кому-то, кто не хранится как «пользователь» вашего приложения. Используя метод фасада Notification :: route, вы можете указать информацию о маршрутизации специального уведомления перед отправкой уведомления:
+Notification::route('mail', 'taylor@example.com')
+            ->route('nexmo', '5555555555')
+            ->route('slack', 'https://hooks.slack.com/services/...')
+            ->notify(new InvoicePaid($invoice));
+
+            Mail-уведомления
+            Форматирование Mail-сообщений
+
+            Если уведомление поддерживает только отправку в виде электронного сообщения, вы должны задать класс toMail в классе уведомления. Этот метод получит сущность $notifiable и должен возвратить экземпляр Illuminate\Notifications\Messages\MailMessage. Mail-сообщения могут содержать строки текста, а также "призыв к действию". Давайте взглянем на пример метода toMail:
+
+            /**
+             * Получить представление уведомления в виде письма.
+             *
+             * @param  mixed  $notifiable
+             * @return \Illuminate\Notifications\Messages\MailMessage
+             */
+            public function toMail($notifiable)
+            {
+                $url = url('/invoice/'.$this->invoice->id);
+
+                return (new MailMessage)
+                            ->greeting('Hello!')
+                            ->line('One of your invoices has been paid!')
+                            ->action('View Invoice', $url)
+                            ->line('Thank you for using our application!');
+            }
+
+                Обратите внимание, что мы используем $this->invoice->id в нашем методе message. В конструктор уведомления можно передавать любые данные, которые требуются уведомлению для генерирования своего сообщения.
+
+            В этом примере мы зарегистрируем приветствие, строку текста, призыв к действию, а затем еще одну строку текста. Эти методы, предоставляемые объектом MailMessage, делают форматирование небольших email-сообщений простым и быстрым. Почтовый канал затем будет преобразовывать компоненты сообщения в симпатичный, отзывчивый HTML email-шаблон с копией только с простым текстом. Вот пример электронного сообщения, генерируемого каналом mail:
+            https://laravel.com/assets/img/notification-example.png
+
+            {tip} При отправке уведомлений по почте не забудьте установить значение name в вашем конфиге config/app.php. Это значение будет использоваться в заголовке и подвале ваших сообщений-уведомлений по почте.
+            Другие опции форматирования уведомления
+
+            Вместо рпделения "строк" текста в классе уведомления, можно использовать методview, чтобы указать пользовательский шаблон, который следует использовать для визуализации email-уведомления:
+
+            /**
+             * Получить представление уведомления в виде письма.
+             *
+             * @param  mixed  $notifiable
+             * @return \Illuminate\Notifications\Messages\MailMessage
+             */
+            public function toMail($notifiable)
+            {
+                return (new MailMessage)->view(
+                    'emails.name', ['invoice' => $this->invoice]
+                );
+            }
+
+            Дополнительно, можно возвращать mailable-объект из метода toMail:
+
+            use App\Mail\InvoicePaid as Mailable;
+
+            /**
+             * Получить представление уведомления в виде письма.
+             *
+             * @param  mixed  $notifiable
+             * @return Mailable
+             */
+            public function toMail($notifiable)
+            {
+                return (new Mailable($this->invoice))->to($this->user->email);
+            }
+
+            Сообщения об ошибке
+
+            Некоторые уведомления оповещают пользователей об ошибках, например, об ошибке при оплате счета. Можно указать, что это почтовое сообщение об ошибке, вызвав метод error при построении вашего сообщения. При использовании метода error в Mail-сообщении кнопка призыва к действию будет красной, а не синей:
+
+            /**
+             * Получить представление уведомления в виде письма.
+             *
+             * @param  mixed  $notifiable
+             * @return \Illuminate\Notifications\Message
+             */
+            public function toMail($notifiable)
+            {
+                return (new MailMessage)
+                            ->error()
+                            ->subject('Notification Subject')
+                            ->line('...');
+            }
+Настройка отправителя
+
+По умолчанию адрес отправителя / отправителя электронного письма определяется в файле конфигурации config / mail.php. Однако вы можете указать адрес отправителя для конкретного уведомления с помощью метода from:
+/**
+ * Get the mail representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->from('test@example.com', 'Example')
+                ->line('...');
+}
+Настройка получателя
+
+При отправке уведомлений по mail каналу система уведомлений автоматически ищет свойство email в вашем уведомляемом объекте. Вы можете настроить, какой адрес электронной почты будет использоваться для доставки уведомления, определив метод routeNotificationForMail для объекта:
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForMail($notification)
+    {
+        // Return email address only...
+        return $this->email_address;
+
+        // Return name and email address...
+        return [$this->email_address => $this->name];
+    }
+}
+Настройка темы
+
+По умолчанию тема сообщения - название класса уведомления, форматированное в виде капитализации начальных букв всех слов в предложении ("title case"). Таким образом, если класс вашего уведомления носит название InvoicePaid, то тема этого email-сообщения будет Invoice Paid (счет оплачен). Если вы хотите указать явно заданную тему собщения, то можно вызвать метод subject при построении вашего сообщения:
+
+/**
+ * Получить представление уведомления в виде письма.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->subject('Notification Subject')
+                ->line('...');
+}
+
+Настройка почтовой программы
+
+По умолчанию уведомление по электронной почте будет отправлено с использованием драйвера по умолчанию, определенного в файле конфигурации config / mail.php. Однако вы можете указать другую почтовую программу во время выполнения, вызвав метод mailer при создании сообщения:
+/**
+ * Get the mail representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->mailer('postmark')
+                ->line('...');
+}
+
+Настройка шаблонов
+
+Вы можете изменить HTML-шаблон и шаблон только с текстом, используемые уведомлениями по почте, опубликовав ресурсы пакета уведомлений. После запуска этой команды шаблоны уведомлений будут располагаться в директории resources/views/vendor/notifications:
+
+php artisan vendor:publish --tag=laravel-notifications
+
+Вложения
+
+Чтобы добавить вложения к уведомлению по электронной почте, используйте метод attach при создании сообщения. Метод attach принимает полный (абсолютный) путь к файлу в качестве своего первого аргумента:
+/**
+ * Get the mail representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->greeting('Hello!')
+                ->attach('/path/to/file');
+}
+При прикреплении файлов к сообщению вы также можете указать отображаемое имя и / или MIME-тип, передав array в качестве второго аргумента методу attach:
+/**
+ * Get the mail representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->greeting('Hello!')
+                ->attach('/path/to/file', [
+                    'as' => 'name.pdf',
+                    'mime' => 'application/pdf',
+                ]);
+}
+В отличие от прикрепления файлов к объектам, подлежащим отправке по почте, вы не можете прикреплять файл непосредственно с диска хранения с помощью attachFromStorage. Лучше использовать метод attach с абсолютным путем к файлу на диске хранения. В качестве альтернативы вы можете вернуть почтовое сообщение из метода toMail.
+
+
+Вложения сырых данных
+
+Метод attachData может использоваться для прикрепления необработанной строки байтов в качестве вложения:
+* Get the mail representation of the notification.
+*
+* @param  mixed  $notifiable
+* @return \Illuminate\Notifications\Messages\MailMessage
+*/
+public function toMail($notifiable)
+{
+   return (new MailMessage)
+               ->greeting('Hello!')
+               ->attachData($this->pdf, 'name.pdf', [
+                   'mime' => 'application/pdf',
+               ]);
+}
+Предварительный просмотр почтовых уведомлений
+При разработке шаблона почтового уведомления удобно быстро предварительно просмотреть обработанное почтовое сообщение в браузере, как в типичном шаблоне Blade. По этой причине Laravel позволяет вам возвращать любое почтовое сообщение, сгенерированное почтовым уведомлением, непосредственно из замыкания маршрута или контроллера. Когда MailMessage возвращается, оно будет обработано и отображено в браузере, что позволит вам быстро просмотреть его дизайн без необходимости отправлять его на реальный адрес электронной почты:
+oute::get('mail', function () {
+    $invoice = App\Invoice::find(1);
+
+    return (new App\Notifications\InvoicePaid($invoice))
+                ->toMail($invoice->user);
+});
+
+Markdown Mail-уведомления
+
+Почтовые уведомления в формате markdown позволяют воспользоваться заранее построенными шаблонами почтовых уведомлений, в то же время давая вам свободу в написании более длинных, настроенные по вашему вкусу сообщений. Так как сообщения пишутся в формате markdown, Laravel может отображать красивые, отзывчивые HTML шаблоны для сообщений, в то же время генерируя их копию исключительно в виде текста.
+Генерирование сообщения
+
+Чтобы сгенерировать уведомление с соответствующим Markdown-шаблоном можно использовать опцию --markdown Artisan-команды make:notification:
+
+php artisan make:notification InvoicePaid --markdown=mail.invoice.paid
+
+Как и все другие почтовые уведомления, уведомления с Markdown-шаблонами должны определять метод toMail в классе уведомления. Однако, вместо использования методов line и action для конструирования уведомления, используйте метод markdown для указания названия Markdown-шаблона, который следует использовать:
+
+/**
+ * Получить представление уведомления в виде письма.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    $url = url('/invoice/'.$this->invoice->id);
+
+    return (new MailMessage)
+                ->subject('Invoice Paid')
+                ->markdown('mail.invoice.paid', ['url' => $url]);
+}
+
+Написание сообщения
+
+Почтовые уведомления в формате markdown используют комбинацию компонентов Blade и синтаксиса Markdown, что позволяет вам запросто конструировать уведомления, пользуясь предварительно созданными компонентами уведомлений Laravel:
+
+@component('mail::message')
+# Счет оплачен
+
+Ваш счет был оплачен!
+
+@component('mail::button', ['url' => $url])
+Просмотреть счет
+@endcomponent
+
+Спасибо,<br>
+{{ config('app.name') }}
+@endcomponent
+
+Компонент Button
+
+Компонент кнопки отображает выравненную по центру ссылку-кнопку. Этот компонент принимает два аргумента: url и необязательный color. Поддерживаются цвета: синий blue, зеленый green и красный red. К уведомлению можно добавлять сколько угодно компонентов-кнопок:
+
+@component('mail::button', ['url' => $url, 'color' => 'green'])
+Просмотреть счет
+@endcomponent
+
+Компонент Panel
+
+Этот компонент отображает заданный блок текста на области, у которой цвет заднего фона для заданной области текста слегка отличается от фона остальной части уведомления. Это позволяет привлечь внимание к заданному блоку текста:
+
+@component('mail::panel')
+This is the panel content.
+@endcomponent
+
+Компонент Table
+
+Компонент таблиц позволяет вам трансформировать Markdown-таблица в HTML-таблицу. Этот компонент принимает Markdown-таблицу и ее содержимое. Поддерживается выравнивание столбцов благодаря Markdown синтаксису выравнивания таблиц по умолчанию:
+
+@component('mail::table')
+| Laravel       | Table         | Example  |
+| ------------- |:-------------:| --------:|
+| Col 2 is      | Centered      | $10      |
+| Col 3 is      | Right-Aligned | $20      |
+@endcomponent
+
+Настройка компонентов
+
+Вы можете экспортировать все Markdown-компоненты уведомления в собственное приложение с целью настройки. Чтобы экспортировать компоненты используйте Artisan-команду vendor:publish для публикации тега ассетов laravel-mail:
+
+php artisan vendor:publish --tag=laravel-mail
+
+Эта команда опубликует почтовые компоненты Markdown в директорию resources/views/vendor/mail. В директории mail будут содержаться директории html иmarkdown, в каждой из которых содержится соответствующее представление каждого доступного компонента. Вы можете свободно изменять эти компоненты по собственному желанию.
+Настройка CSS
+
+После экспортирования компонентов директория resources/views/vendor/mail/html/themes будет содержать файлdefault.css. Вы можете настроить CSS в этом файле и ваши стили будут автоматически приведены в соответствие с HTML-представлениями ваших Markdown-уведомлений.
+
+    Если вы бы хотели построить полностью новую тему для Markdown-компонентов, просто создайте новый файл CSS в директории html/themes и измените параметр theme конфига mail.
+
+    Чтобы настроить тему для отдельного уведомления, вы можете вызвать метод theme при создании почтового сообщения уведомления. Метод theme принимает имя темы, которое следует использовать при отправке уведомления:
+
+    /**
+ * Get the mail representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return \Illuminate\Notifications\Messages\MailMessage
+ */
+public function toMail($notifiable)
+{
+    return (new MailMessage)
+                ->theme('invoice')
+                ->subject('Invoice Paid')
+                ->markdown('mail.invoice.paid', ['url' => $url]);
+}
+
+
+БД-уведомления
+Требования
+
+Канал уведомлений database хранит информацию уведомления в таблице базы данных. Эта таблица будет содержать такую информацию как тип уведомления, а также пользовательские данные JSON, которые описывают уведомление.
+
+Вы можете запросить, чтобы таблица отображала уведомления в пользовательском интерфейсе вашего приложения. Но, прежде чем вы сможете это сделать, вам потребуется создать таблицу БД, которая будет содержать ваши уведомления. Можно использовать команду notifications:table для генерирования миграции с подходящей схемой таблицы:
+
+php artisan notifications:table
+
+php artisan migrate
+
+Форматирование БД-уведомлений
+
+Если уведомление можно хранить в таблице БД, вам следует задать метод toDatabase или toArray в классе уведомления. Этот метод получит сущность $notifiable и должен вернуть простой PHP массив. Возвращенный массив будет кодирован как JSON и будет храниться в столбце data вашей таблицы notifications. Давайте взглянем на метод-пример toArray:
+
+/**
+ * Получить представление уведомления в виде массива.
+ *
+ * @param  mixed  $notifiable
+ * @return array
+ */
+public function toArray($notifiable)
+{
+    return [
+        'invoice_id' => $this->invoice->id,
+        'amount' => $this->invoice->amount,
+    ];
+}
+
+toDatabase против toArray
+
+Метод toArray также используется каналом broadcast, чтобы определить какие данные вещать вашему JavaScript-клиенту. Если вы хотите, чтобы у вас было два разных представления массива для каналов database и broadcast, вам следует задать метод toDatabase вместо метода toArray.
+Доступ к уведомлениям
+
+Если уведомления хранятся в БД, то вам потребуется удобный способ получить к ним доступ из уведомляемых (notifiable) сущностей. Трейт Illuminate\Notifications\Notifiable, который включен в модель Laravel App\User по умолчанию, включает Eloquent-отношение notifications, которое возвращает уведомления для сущности. В целях выборки уведомлений можно получить доступ к данному методу как и к любому другому Eloquent-отношению. По умолчанию уведомления будут отсортированы по метке created_at:
+
+$user = App\User::find(1);
+
+foreach ($user->notifications as $notification) {
+    echo $notification->type;
+}
+
+Если вы хотите получить только "непрочитанные" уведомления, можно использовать отношение unreadNotifications. Опять же, эти уведомления будут отсортированы по метке created_at:
+
+$user = App\User::find(1);
+
+foreach ($user->unreadNotifications as $notification) {
+    echo $notification->type;
+}
+
+    Для доступа к уведомлениям из вашего JavaScript-клиента вам следует задать контроллер уведомлений для своего приложения, который будет возвращать уведомления для уведомляемой сущности, такой как текущий пользователь. Затем вы можете выполнить HTTP-запрос к URI этого контроллера из своего JavaScript-клиента.
+
+Пометить уведомления как прочитанные
+
+Как правило, нужно будет помечать уведомления "прочитанными" после того, как пользователь просмотрит эти уведомления. Трейт Illuminate\Notifications\Notifiable предоставляет метод markAsRead, который обновляет столбец read_at в записи уведомления в БД:
+
+$user = App\User::find(1);
+
+foreach ($user->unreadNotifications as $notification) {
+    $notification->markAsRead();
+}
+
+Однако, вмето прохождения в цикле по каждому уведомлению можно использовать метод markAsRead напрямую на коллекции уведомлений:
+
+$user->unreadNotifications->markAsRead();
+
+Вы также можете использовать запрос массового обновления, чтобы пометить все уведомления прочитанными без получения их из базы данных:
+
+$user = App\User::find(1);
+
+$user->unreadNotifications()->update(['read_at' => Carbon::now()]);
+
+Конечно, можно удалить (delete) уведомления, чтобы полностью убрать их из таблицы:
+
+$user->notifications()->delete();
+
+Бродкаст-уведомления
+Требования
+
+Перед вещанием уведомлений вам следует настроить и ознакомиться с сервисами бродкаста событий Laravel. Вещание событий предоставляет способ реагировать на выбрасываемые со стороны сервера события Laravel от вашего JavaScript-клиента.
+Форматирование уведомлений вещания
+
+Уведомления вещания канала broadcast, использующие сервисы вещания событий Laravel, позволяют вашему JavaScript-клиенту ловить уведомления в режиме реального времени. Если уведомление поддерживает бродкаст, нужно задать метод toBroadcast в классе уведомления. Этот метод получит сущность $notifiable и должен вернуть экземпляр BroadcastMessage. Возвращаемые данные будут кодированы как JSON и будут отправлены по вебсокет-совдинению вашему JavaScript-клиенту. Рассмотрим пример метода toBroadcast:
+
+use Illuminate\Notifications\Messages\BroadcastMessage;
+
+/**
+ * Получить вещаемое представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return BroadcastMessage
+ */
+public function toBroadcast($notifiable)
+{
+    return new BroadcastMessage([
+        'invoice_id' => $this->invoice->id,
+        'amount' => $this->invoice->amount,
+    ]);
+}
+
+Настройка очереди вещания
+
+Все уведомления вещания становятся в очередь на вещание. Если вам нужно настроить подключение очереди или имя очереди, можно использовать методы onConnection и onQueue в BroadcastMessage:
+
+return (new BroadcastMessage($data))
+                ->onConnection('sqs')
+                ->onQueue('broadcasts');
+
+    Дополнительно к указываемым данным, уведомления вещания также будут содержать поле type, содержащее имя класса уведомления.
+
+    Настройка типа уведомления
+
+    В дополнение к указанным вами данным все широковещательные уведомления также имеют поле type, содержащее полное имя класса уведомления. Если вы хотите настроить type уведомления, который предоставляется клиенту JavaScript, вы можете определить метод broadcastType в классе уведомлений:
+    use Illuminate\Notifications\Messages\BroadcastMessage;
+
+    /**
+     * Get the type of the notification being broadcast.
+     *
+     * @return string
+     */
+    public function broadcastType()
+    {
+        return 'broadcast.message';
+    }
+
+    Слушать уведомления
+
+    Уведомления будут вещаться на приватном канале, форматированном по конвенции {notifiable}.{id}. Поэтому если вы отправляете уведомление экземпляру App\User с ID равным 1, уведомление будет вещаться только на приватном канале App.User.1. При использовании Laravel Echo можно легко слушать уведомления на канале, используя метод-хелпер notification:
+
+    Echo.private('App.User.' + userId)
+        .notification((notification) => {
+            console.log(notification.type);
+        });
+
+    Настройка канала уведомлений
+
+    Можно задать метод receivesBroadcastNotificationsOn в уведомляемой сущности, если вы хотите настроить по каким каналам уведомляемая сущность будет получать свои уведомления:
+
+
+namespace App;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+        * The channels the user receives notification broadcasts on.
+        *
+        * @return string
+        */
+    public function receivesBroadcastNotificationsOn()
+    {
+        return 'users.'.$this->id;
+    }
+}
+
+SMS-уведомления
+Требования
+Отправка SMS-уведомлений в Laravel обеспечивается Nexmo. Прежде чем вы сможете отправлять уведомления через Nexmo, вам необходимо установить пакет Composer laravel / nexmo-notification-channel:
+composer require laravel/nexmo-notification-channel
+Это также установит пакет nexmo / laravel. Этот пакет включает собственный файл конфигурации. Вы можете использовать переменные среды NEXMO_KEY и NEXMO_SECRET, чтобы установить свой открытый и секретный ключ Nexmo.
+
+Затем вам нужно будет добавить параметр конфигурации в файл конфигурации config / services.php. Вы можете скопировать пример конфигурации ниже, чтобы начать:
+'nexmo' => [
+    'sms_from' => '15556666666',
+],
+Параметр sms_from - это номер телефона, с которого будут отправляться ваши SMS-сообщения. Вы должны сгенерировать номер телефона для своего приложения в панели управления Nexmo.
+
+Форматирование SMS-уведомлений
+
+Если уведомление поддерживает отправку через SMS, нужно задать метод toNexmo в классе уведомления. Данный метод получит сущность $notifiable и должен вернуть экземпляр Illuminate\Notifications\Messages\NexmoMessage:
+
+/**
+ * Get the Nexmo / SMS representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return NexmoMessage
+ */
+public function toNexmo($notifiable)
+{
+    return (new NexmoMessage)
+                ->content('Your SMS message content');
+}
+
+
+Форматирование уведомлений о шорткодах
+Laravel также поддерживает отправку уведомлений с короткими кодами, которые представляют собой предварительно определенные шаблоны сообщений в вашей учетной записи Nexmo. Вы можете указать тип уведомления (alert, 2fa, or marketing), а также пользовательские значения, которые будут заполнять шаблон:
+/**
+ * Get the Nexmo / Shortcode representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return array
+ */
+public function toShortcode($notifiable)
+{
+    return [
+        'type' => 'alert',
+        'custom' => [
+            'code' => 'ABC123',
+        ];
+    ];
+}
+Как и при маршрутизации SMS-уведомлений, вы должны реализовать метод routeNotificationForShortcode в своей модели, подлежащей уведомлению.
+Юникод-контент
+
+Если ваше SMS-сообщение будет содержать символы в кодировке юникод, нужно вызвать метод unicode во время конструирования экземпляра NexmoMessage:
+
+/**
+ * Get the Nexmo / SMS representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return NexmoMessage
+ */
+public function toNexmo($notifiable)
+{
+    return (new NexmoMessage)
+                ->content('Your unicode message')
+                ->unicode();
+}
+
+Настройка номера "From"
+
+Если вам нужно отправить некоторые уведомления с номера, отличающегося от телефонного номера, указанного в файле config/services.php, можно использовать метод from на экземпляре NexmoMessage:
+
+/**
+ * Get the Nexmo / SMS representation of the notification.
+ *
+ * @param  mixed  $notifiable
+ * @return NexmoMessage
+ */
+public function toNexmo($notifiable)
+{
+    return (new NexmoMessage)
+                ->content('Your SMS message content')
+                ->from('15554443333');
+}
+
+Роутинг SMS-уведомлений
+Чтобы перенаправить уведомления Nexmo на правильный номер телефона, определите метод routeNotificationForNexmo для вашего уведомляемого объекта:
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * Route notifications for the Nexmo channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string
+     */
+    public function routeNotificationForNexmo($notification)
+    {
+        return $this->phone_number;
+    }
+}
+
+Slack-уведомления
+Требования
+
+Прежде чем начать отправлять уведомления через Slack, вам необходимо установить HTTP библиотеку Guzzle через Composer:
+
+composer require guzzlehttp/guzzle
+
+Вам также нужно будет настроить интеграцию "Входящего Веб-хука" ("Incoming Webhook") для своей команды Slack. Эта интеграция предоставит URL, который можно использовать при роутинге Slack-уведомлений.
+Форматирование Slack-уведомлений
+
+Если уведомление поддерживает отправку в виде Slack-сообщения, то вам нужно задать метод toSlack классу уведомления. Этот метод получит сущность $notifiable и должен возвратить экземпляр Illuminate\Notifications\Messages\SlackMessage. Slack-сообщения могут содержать как текст, так и "вложение", которое форматирует дополнительный текст или массив полей. Рассмотрим базовый пример toSlack пример:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    return (new SlackMessage)
+                ->content('One of your invoices has been paid!');
+}
+
+В этом примере мы просто отправляем одну строку текста Slack, что создаст сообщение, которое выглядит следующим образом:
+https://laravel.com/assets/img/basic-slack-notification.png
+
+Настройка отправителя и получателя
+
+Можно использовать методы from и to для настройки отправителя и получателя. Метод from принимает в качестве идентификатора имя пользователя и эмоджи, в то время как метод to принимает канал или имя пользователя:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    return (new SlackMessage)
+                ->from('Ghost', ':ghost:')
+                ->to('#other')
+                ->content('This will be sent to #other');
+}
+
+Также в качестве логотипа можно использовать изображение вместо эмоджи:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    return (new SlackMessage)
+                ->from('Laravel')
+                ->image('https://laravel.com/favicon.png')
+                ->content('This will display the Laravel logo next to the message');
+}
+
+Slack-вложения
+
+Вы также можете добавлять "вложения" к сообщениям Slack. Вложения обеспечивают более богатые возможности форматирования, чем простые текстовые сообщения. В этом примере мы отправим уведомление об исключении, которое произошло в приложении, включая ссылку для просмотра более подробной информации об исключении:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    $url = url('/exceptions/'.$this->exception->id);
+
+    return (new SlackMessage)
+                ->error()
+                ->content('Whoops! Something went wrong.')
+                ->attachment(function ($attachment) use ($url) {
+                    $attachment->title('Exception: File Not Found', $url)
+                               ->content('File [background.jpg] was not found.');
+                });
+}
+
+Пример выше сгенерирует Slack-сообщение, которое выглядит следующим образом:
+https://laravel.com/assets/img/basic-slack-attachment.png
+Вложения также позволяют указывать массив данных, которые нужно презентовать пользователю. Эти данные будут представлены в виде таблицы для упрощения чтения:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    $url = url('/invoices/'.$this->invoice->id);
+
+    return (new SlackMessage)
+                ->success()
+                ->content('One of your invoices has been paid!')
+                ->attachment(function ($attachment) use ($url) {
+                    $attachment->title('Invoice 1322', $url)
+                               ->fields([
+                                    'Title' => 'Server Expenses',
+                                    'Amount' => '$1,234',
+                                    'Via' => 'American Express',
+                                    'Was Overdue' => ':-1:',
+                                ]);
+                });
+}
+
+Пример выше создаст Slack-сообщение, которое выглядит так:
+https://laravel.com/assets/img/slack-fields-attachment.png
+
+Markdown содержимое вложения
+
+Если некоторые из полей вашего вложения содержат разметку Markdown, можно использовать метод markdown, чтобы сообщить Slack анализировать и отображать заданные поля вложения как форматированный Markdown-текст:
+
+/**
+ * Получить Slack-представление уведомления.
+ *
+ * @param  mixed  $notifiable
+ * @return SlackMessage
+ */
+public function toSlack($notifiable)
+{
+    $url = url('/exceptions/'.$this->exception->id);
+
+    return (new SlackMessage)
+                ->error()
+                ->content('Whoops! Something went wrong.')
+                ->attachment(function ($attachment) use ($url) {
+                    $attachment->title('Exception: File Not Found', $url)
+                               ->content('File [background.jpg] was *not found*.')
+                               ->markdown(['title', 'text']);
+                });
+}
+
+Роутинг Slack-уведомлений
+
+Чтобы направить Slack-уведомления в подходящее местоположение, задайте метод routeNotificationForSlack вашей уведомляемой сущности. Это должно вернуть URL веб-хука, которому нужно доставить данное уведомление. URL веб-хуков можно генерировать добавляя сервис "Incoming Webhook" своей команде Slack:
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * Route notifications for the Slack channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string
+     */
+    public function routeNotificationForSlack($notification)
+    {
+        return 'https://hooks.slack.com/services/...';
+    }
+}
+
+Локализация уведомлений
+
+Laravel позволяет отправлять уведомления на языке, отличном от текущего, и даже запоминает этот языковой стандарт, если уведомление находится в очереди.
+
+Для этого класс Illuminate \ Notifications \ Notification предлагает метод locale для установки желаемого языка. Приложение изменится на этот языковой стандарт при форматировании уведомления, а затем вернется к предыдущему языку после завершения форматирования:
+$user->notify((new InvoicePaid($invoice))->locale('es'));
+Локализация нескольких подлежащих уведомлению записей также может быть достигнута через Notification фасад:
+Notification::locale('es')->send($users, new InvoicePaid($invoice));
+
+Предпочитаемые пользователем регионы
+
+Иногда приложения хранят предпочтительный языковой стандарт каждого пользователя. Реализуя контракт HasLocalePreference в вашей уведомляемой модели, вы можете указать Laravel использовать этот сохраненный языковой стандарт при отправке уведомления:
+use Illuminate\Contracts\Translation\HasLocalePreference;
+
+class User extends Model implements HasLocalePreference
+{
+    /**
+     * Get the user's preferred locale.
+     *
+     * @return string
+     */
+    public function preferredLocale()
+    {
+        return $this->locale;
+    }
+}
+После того, как вы реализовали интерфейс, Laravel будет автоматически использовать предпочтительный языковой стандарт при отправке уведомлений и почтовых сообщений в модель. Следовательно, при использовании этого интерфейса нет необходимости вызывать метод locale:
+$user->notify(new InvoicePaid($invoice));
+События уведомлений
+
+Когда уведомление уже отправлено, системой уведомления выбрасывается событие Illuminate\Notifications\Events\NotificationSent. Оно содержит сущность "notifiable" и сам экземпляр уведомления. Вы можете зарегистрировать слушателей для этого события в своем EventServiceProvider:
+
+/**
+ * The event listener mappings for the application.
+ *
+ * @var array
+ */
+protected $listen = [
+    'Illuminate\Notifications\Events\NotificationSent' => [
+        'App\Listeners\LogNotification',
+    ],
+];
+
+    После регистрирования слушателей в вашем EventServiceProvider, используйте Artisan-команду event:generate для быстрого генерирования классов слушателей.
+
+В слушателе событий можно получить доступ к свойствам события notifiable, notification и channel, чтобы узнать больше о получателе уведомления или о самом уведомлении:
+
+/**
+ * Обработка события.
+ *
+ * @param  NotificationSent  $event
+ * @return void
+ */
+public function handle(NotificationSent $event)
+{
+    // $event->channel
+    // $event->notifiable
+    // $event->notification
+}
+
+Пользовательские каналы
+
+Laravel поставляется с несколькими каналами уведомлений, но вы можете захотеть написать свои собственные драйверы для доставки уведомлений по другим каналам. В Laravel это чрезвычайно просто. Для начала определите класс, который содержит метод send. Этот метод должен получать два аргумента: $notifiable и $notification:
+
+
+namespace App\Channels;
+
+use Illuminate\Notifications\Notification;
+
+class VoiceChannel
+{
+    /**
+     * Отправка заданного уведомления.
+     *
+     * @param  mixed  $notifiable
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return void
+     */
+    public function send($notifiable, Notification $notification)
+    {
+        $message = $notification->toVoice($notifiable);
+
+        // Отправка уведомления экземпляру $notifiable...
+    }
+}
+
+Как только был определен класс вашего канала уведомлений, вы можете просто вернуть название класса из метода via любого из ваших уведомлений:
+
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use App\Channels\VoiceChannel;
+use App\Channels\Messages\VoiceMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class InvoicePaid extends Notification
+{
+    use Queueable;
+
+    /**
+     * Получить каналы уведомления.
+     *
+     * @param  mixed  $notifiable
+     * @return array|string
+     */
+    public function via($notifiable)
+    {
+        return [VoiceChannel::class];
+    }
+
+    /**
+     * Получить голосовое представление уведомления.
+     *
+     * @param  mixed  $notifiable
+     * @return VoiceMessage
+     */
+    public function toVoice($notifiable)
+    {
+        // ...
+    }
+}
     </div>
     <div class="theme">
-    </div>
-    <div class="theme">
-    </div>
-    <div class="theme">
-    </div>
-    <div class="theme">
+        <h2 class="theme__title">
+            Разработка пакетов
+        </h2>
+
+
+
+
+
+
+
+
+
+
     </div>
     <div class="theme">
     </div>
@@ -5402,7 +10038,6 @@ $time = Storage::lastModified('file1.jpg');
 
 
 
-https://laravel.ru/docs/v5/broadcasting
 
 
 {{--
