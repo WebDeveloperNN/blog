@@ -2882,84 +2882,871 @@ class CreateFlightsTable extends Migration
 <h4 class="theme_subtitlex2">
     Требования
 </h4>
-<p class="theme__text"></p>
+<p class="theme__text">
+    Перед изменением столбцов добавьте зависимость doctrine/dbal в свой файл composer.json. Библиотека Doctrine DBAL используется для определения текущего состояния столбца и создания SQL-запросов, необходимых для выполнения указанных преобразований столбца:
+</p>
 <code>
 <pre>
+composer require doctrine/dbal
 </pre>
 </code>
+<h4 class="theme_subtitlex2">
+    Изменение атрибутов столбца
+</h4>
+<p class="theme__text">
+    Метод change() позволяет изменить тип существующего столбца или изменить его атрибуты. Например, если вы захотите увеличить размер строкового столбца name с 25 до 50:
+</p>
+<code>
+<pre>
+Schema::table('users', function (Blueprint $table) {
+    $table->string('name', 50)->change();
+});
+</pre>
+</code>
+<p class="theme__text">
+    Также мы можем изменить столбец, чтобы он стал «обнуляемым»:
+</p>
+<code>
+<pre>
+Schema::table('users', function (Blueprint $table) {
+    $table->string('name', 50)->nullable()->change();
+});
+</pre>
+</code>
+<p class="theme__text">
+    Столбы следующих типов нельзя «изменить»: bigInteger, binary, boolean, date, dateTime, dateTimeTz, decimal, integer, json, longText, mediumText, smallInteger, string, text, time, unsignedBigInteger, unsignedInteger, unsignedSmallInteger and uuid.
+</p>
+<h4 class="theme_subtitlex2">
+    Переименование столбцов
+</h4>
+<p class="theme__text">
+    Для переименования столбца используйте метод renameColumn() на построителе структур. Перед переименованием столбца добавьте зависимость doctrine/dbal в свой файл composer.json:
+</p>
+<code>
+<pre>
+Schema::table('users', function (Blueprint $table) {
+    $table->renameColumn('from', 'to');
+});
+</pre>
+</code>
+<p class="theme__text">
+    Переименование столбца enum в настоящее время не поддерживается.
+</p>
+<h4 class="theme_subtitlex2">
+    Удаление столбцов
+</h4>
+<p class="theme__text">
+    Для удаления столбца используйте метод dropColumn() на построителе структур. Перед удалением столбцов из базы данных SQLite вам необходимо добавить зависимость doctrine/dbal в ваш файл composer.json и выполнить команду composer update для установки библиотеки:
+</p>
+<code>
+<pre>
+Schema::table('users', function (Blueprint $table) {
+    $table->dropColumn('votes');
+});
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете удалить несколько столбцов таблицы, передав массив их имён в метод dropColumn():
+</p>
+<code>
+<pre>
+Schema::table('users', function (Blueprint $table) {
+    $table->dropColumn(['votes', 'avatar', 'location']);
+});
+</pre>
+</code>
+<p class="theme__text">
+    Удаление и изменение нескольких столбцов одной миграцией не поддерживается для базы данных SQLite.
+    <br><br>
+    Доступные псевдонимы команд
+</p>
+<table>
+    <tr>
+        <td>
+            Команда
+        </td>
+        <td>
+            Описание
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropMorphs('morphable');
+        </td>
+        <td>
+            Отбросьте столбцы morphable_id и morphable_type.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropRememberToken();
+        </td>
+        <td>
+            Отбросьте столбец Remember_token.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropSoftDeletes();
+        </td>
+        <td>
+            Отбросьте столбец deleted_at.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropSoftDeletesTz();
+        </td>
+        <td>
+            Псевдоним метода dropSoftDeletes ().
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropTimestamps();
+        </td>
+        <td>
+            Отбросьте столбцы created_at и updated_at.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropTimestampsTz();
+        </td>
+        <td>
+            Псевдоним метода dropTimestamps ().
+        </td>
+    </tr>
+</table>
+<h3 class="theme__subtitle">Индексы</h3>
+<h4 class="theme_subtitlex2">Создание индексов</h4>
+<p class="theme__text">
+    Построитель структур поддерживает несколько типов индексов. Сначала давайте посмотрим на пример, в котором задаётся, что значения столбца должны быть уникальными. Для создания индекса мы можем просто сцепить метод unique() с определением столбца:
+</p>
+<code>
+<pre>
+$table->string('email')->unique();
+</pre>
+</code>
+<p class="theme__text">
+    Другой вариант — создать индекс после определения столбца. Например:
+</p>
+<code>
+<pre>
+$table->unique('email');
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете даже передать массив столбцов в метод index() для создания сложного индекса:
+</p>
+<code>
+<pre>
+$table->index(['account_id', 'created_at']);
+</pre>
+</code>
+<p class="theme__text">
+    Laravel автоматически генерирует подходящее имя индекса, но вы можете передать своё значение вторым аргументом метода:
+</p>
+<code>
+<pre>
+$table->index('email', 'my_index_name');
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Доступные типы индексов
+</h4>
+<p class="theme__text">
+    Каждый метод индекса принимает необязательный второй аргумент для указания имени индекса. Если опущено, имя будет производным от имен таблицы и столбцов, используемых для индекса, а также типа индекса.
+</p>
+<table>
+    <tr>
+        <td>
+            Команда
+        </td>
+        <td>
+            Описание
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->primary('id');
+        </td>
+        <td>
+            Добавление первичного ключа
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->primary(['id', 'parent_id']);
+        </td>
+        <td>
+            Добавление составных ключей
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->unique('email');
+        </td>
+        <td>
+            обавление уникального индекса
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->index('state');
+        </td>
+        <td>
+            Добавление базового индекса
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->spatialIndex('location');
+        </td>
+        <td>
+            Добавляет пространственный индекс. (кроме SQLite)
+        </td>
+    </tr>
+</table>
+<h4 class="theme_subtitlex2">
+    Длина индекса и MySQL / MariaDB
+</h4>
+<p class="theme__text">
+    Laravel по умолчанию использует набор символов utf8mb4, который включает поддержку хранения «эмодзи» в базе данных. Если вы используете версию MySQL старше версии 5.7.7 или MariaDB старше версии 10.2.2, вам может потребоваться вручную настроить длину строки по умолчанию, генерируемую миграциями, чтобы MySQL мог создавать для них индексы. Вы можете настроить это, вызвав метод Schema :: defaultStringLength в вашем AppServiceProvider:
+</p>
+<code>
+<pre>
+use Illuminate\Support\Facades\Schema;
 
+public function boot()
+{
+    Schema::defaultStringLength(191);
+}
+</pre>
+</code>
+<p class="theme__text">
+    В качестве альтернативы вы можете включить опцию innodb_large_prefix для своей базы данных. Обратитесь к документации вашей базы данных для получения инструкций о том, как правильно включить эту опцию.
+</p>
+<h4 class="theme_subtitlex2">
+    Переименование индексов
+</h4>
+<p class="theme__text">
+    Чтобы переименовать индекс, вы можете использовать метод renameIndex. Этот метод принимает текущее имя индекса в качестве первого аргумента и желаемое новое имя в качестве второго аргумента:
+</p>
+<code>
+<pre>
+$table->renameIndex('from', 'to')
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Удаление индексов
+</h4>
+<p class="theme__text">
+    Для удаления индекса необходимо указать его имя. По умолчанию Laravel автоматически назначает имена индексам. Просто соедините имя таблицы, имя столбца-индекса и тип индекса. Вот несколько примеров:
+</p>
+<table>
+    <tr>
+        <td>
+            Команда
+        </td>
+        <td>
+            Описание
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropPrimary('users_id_primary');
+        </td>
+        <td>
+            Удаление первичного ключа из таблицы "users"
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropUnique('users_email_unique');
+        </td>
+        <td>
+            Удаление уникального индекса из таблицы "users"
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropIndex('geo_state_index');
+        </td>
+        <td>
+            Удаление базового индекса из таблицы "geo"
+        </td>
+    </tr>
+    <tr>
+        <td>
+            $table->dropSpatialIndex('geo_location_spatialindex');
+        </td>
+        <td>
+            Удалите пространственный индекс из таблицы "geo" (кроме SQLite).
+        </td>
+    </tr>
+</table>
+<p class="theme__text">
+    Если вы передадите массив столбцов в метод для удаления индексов, будет сгенерировано стандартное имя индекса на основе имени таблицы, столбца и типа ключа:
+</p>
+<code>
+<pre>
+Schema::table('geo', function (Blueprint $table) {
+    $table->dropIndex(['state']); // Удаление индекса 'geo_state_index'
+});
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Ограничения внешнего ключа
+</h4>
+<p class="theme__text">
+    Laravel также поддерживает создание ограничений для внешнего ключа, которые используются для обеспечения ссылочной целостности на уровне базы данных. Например, давайте определим столбец user_id в таблице posts, который ссылается на столбец id в таблице users:
+</p>
+<code>
+<pre>
+Schema::table('posts', function (Blueprint $table) {
+    $table->unsignedBigInteger('user_id');
 
+    $table->foreign('user_id')->references('id')->on('users');
+});
+</pre>
+</code>
+<p class="theme__text">
+    Поскольку этот синтаксис довольно подробный, Laravel предоставляет дополнительные, более сжатые методы, которые используют соглашения, чтобы обеспечить лучший опыт разработчика. Пример выше можно записать так:
+</p>
+<code>
+<pre>
+Schema::table('posts', function (Blueprint $table) {
+    $table->foreignId('user_id')->constrained();
+});
+</pre>
+</code>
+<p class="theme__text">
+    Метод foreignId является псевдонимом для unsignedBigInteger, в то время как constrained метод будет использовать соглашение для определения имени таблицы и столбца, на которые ссылаются. Если имя вашей таблицы не соответствует соглашению, вы можете указать имя таблицы, передав его в качестве аргумента constrained методу:
+</p>
+<code>
+<pre>
+Schema::table('posts', function (Blueprint $table) {
+    $table->foreignId('user_id')->constrained('users');
+});
+</pre>
+</code>
+<p class="theme__text">
+    Вы также можете указать требуемое действие для свойств "on delete" и "on update" ограничений:
+</p>
+<code>
+<pre>
+$table->foreignId('user_id')
+    ->constrained()
+    ->onUpdate('cascade')
+    ->onDelete('cascade');
+</pre>
+</code>
+<p class="theme__text">
+    Любые дополнительные модификаторы столбца должны быть вызваны до ограничения:
+</p>
+<code>
+<pre>
+$table->foreignId('user_id')
+      ->nullable()
+      ->constrained();
+</pre>
+</code>
+<p class="theme__text">
+    Для удаления внешнего ключа используйте метод dropForeign(). Ограничения внешнего ключа используют те же принципы именования, что и индексы. Итак, мы соединим имя таблицы и столбцов из ограничения, а затем добавим суффикс "_foreign":
+</p>
+<code>
+<pre>
+$table->dropForeign('posts_user_id_foreign');
+</pre>
+</code>
+<p class="theme__text">
+    Либо вы можете передать значение массива, при этом для удаления будет автоматически использовано стандартное имя ограничения:
+</p>
+<code>
+<pre>
+$table->dropForeign(['user_id']);
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете включить или выключить ограничения внешнего ключа в своих миграциях с помощью следующих методов:
+</p>
+<code>
+<pre>
+Schema::enableForeignKeyConstraints();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Schema::disableForeignKeyConstraints();
+</pre>
+</code>
+<p class="theme__text">
+    SQLite по умолчанию отключает ограничения внешнего ключа. При использовании SQLite обязательно включите поддержку внешних ключей в конфигурации вашей базы данных, прежде чем пытаться создать их в своих миграциях. Кроме того, SQLite поддерживает внешние ключи только при создании таблицы, а не при изменении таблиц.
+</p>
     </div>
     <div class="theme">
+<h3 class="theme__subtitle">
+    Загрузка начальных данных в БД
+</h3>
+<p class="theme__text">
+    У Laravel есть простой механизм наполнения вашей БД начальными данными (seeding) с помощью специальных классов. Все такие классы хранятся в каталоге database/seeds. Они могут иметь любое имя, но вам, вероятно, следует придерживаться какой-то логики в их именовании — например, UserTableSeeder и т.д. По умолчанию для вас уже определён класс DatabaseSeeder. Из этого класса вы можете вызывать метод call() для подключения других классов с данными, что позволит вам контролировать порядок их выполнения.
+</p>
+<h3 class="theme__subtitle">
+    Создание начальных данных
+</h3>
+<p class="theme__text">
+    Для добавления данных в БД используйте Artisan-команду make:seeder. Все начальные данные, сгенерированные фреймворком, будут помещены в папке database/seeders:
+</p>
+<code>
+<pre>
+php artisan make:seeder UsersTableSeeder
+</pre>
+</code>
+<p class="theme__text">
+    Класс начальных данных содержит в себе только один метод по умолчанию — run(). Этот метод вызывается, когда выполняется Artisan-команда db:seed. В методе run() вы можете вставить любые данные в БД. Вы можете использовать конструктор запросов, чтобы вручную вставить данные. Также можно воспользоваться фабриками Eloquent моделей.
+    <br><br>
+    Защита массового назначения автоматически отключается во время заполнения базы данных.
+    <br><br>
+    В качестве примера давайте модифицируем стандартный класс DatabaseSeeder и добавим оператор вставки в БД в метод run():
+</p>
+<code>
+<pre>
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run()
+    {
+        DB::table('users')->insert([
+            'name' => Str::random(10),
+            'email' => Str::random(10).'@gmail.com',
+            'password' => Hash::make('password'),
+        ]);
+    }
+}
+</pre>
+</code>
+<p class="theme__text">
+    Вы можете указать любые необходимые зависимости в сигнатуре метода запуска. Они будут автоматически разрешены через сервисный контейнер Laravel.
+</p>
+<h3 class="theme__subtitle">
+    Использование фабрик моделей
+</h3>
+<p class="theme__text">
+    Конечно, ручное определение признаков для каждой модели начальных данных затруднительно. Вместо этого вы можете использовать фабрики моделей для быстрой генерации больших объёмов данных. Во-первых, пересмотрите документацию по фабрике моделей (db testing link), чтобы изучить, как определяются фабрики. Как только вы определите свои фабрики, вы можете использовать вспомогательную функцию factory(), чтобы вставлять записи в вашу базу данных.
+    <br><br>
+    Например, давайте создадим 50 пользователей и привяжем отношения к каждому из них:
+</p>
+<code>
+<pre>
+use App\Models\User;
+
+public function run()
+{
+    User::factory()
+            ->times(50)
+            ->hasPosts(1)
+            ->create();
+}
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    Вызов дополнительной загрузки начальных данных
+</h3>
+<p class="theme__text">
+    В классе DatabaseSeeder вы можете использовать метод call(), чтобы запустить дополнительные классы загрузки. Использование метода call() позволяет вам разбить свою загрузку начальных данных на несколько файлов, чтобы ни один отдельный класс загрузки не разрастался. Просто передайте название класса загрузки, который вы хотите выполнить:
+</p>
+<code>
+<pre>
+public function run()
+{
+    $this->call([
+        UserSeeder::class,
+        PostSeeder::class,
+        CommentSeeder::class,
+    ]);
+}
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    Запуск загрузки начальных данных
+</h3>
+<p class="theme__text">
+    Как только вы написали свои классы загрузки, вы можете использовать Artisan-команду db:seed для запуска загрузки. По умолчанию команда db:seed вызывает класс DatabaseSeeder, который может быть использован для вызова других классов, заполняющих БД данными. Однако, вы можете использовать параметр --class для указания конкретного класса для вызова:
+</p>
+<code>
+<pre>
+php artisan db:seed
+
+php artisan db:seed --class=UserSeeder
+</pre>
+</code>
+<p class="theme__text">
+    Вы также можете использовать для заполнения БД данными команду migrate:refresh, которая также откатит и заново применит все ваши миграции:
+</p>
+<code>
+<pre>
+php artisan migrate:fresh --seed
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Запуск загрузки начальных данных в продакшане
+</h4>
+<p class="theme__text">
+    Некоторые операции по заполнению могут привести к изменению или потере данных. Чтобы защитить вас от запуска команд раздачи для вашей производственной базы данных, вам будет предложено подтвердить перед запуском сидеров. Чтобы заставить сеялки работать без подсказки, используйте флаг --force:
+</p>
+<code>
+<pre>
+php artisan db:seed --force
+</pre>
+</code>
     </div>
     <div class="theme">
+        <h2 class="theme__title">
+            Redis
+        </h2>
+<p class="theme__text">
+    Redis — открытое продвинутое хранилище пар ключ/значение. Его часто называют сервисом структур данных, так как ключи могут содержать строки, хэши, списки, наборы и сортированные наборы.
+    <br><br>
+    Чтобы начать использовать Redis с Laravel, необходимо либо установить пакет predis/predis с помощью Composer:
+</p>
+<code>
+<pre>
+composer require predis/predis
+</pre>
+</code>
+<p class="theme__text">
+    Либо, вы можете установить расширение для PHP PhpRedis через PECL. Расширение сложнее установить, но оно даёт большую производительность для приложений, которые активно используют Redis.
+</p>
+<h3 class="theme__subtitle">Настройка</h3>
+<p class="theme__text">
+    Настройки вашего подключения к Redis хранятся в файле config/database.php. В нём вы найдёте массив redis, содержащий список серверов, используемых приложением:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    'default' => [
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'password' => env('REDIS_PASSWORD', null),
+        'port' => env('REDIS_PORT', 6379),
+        'database' => env('REDIS_DB', 0),
+    ],
+
+    'cache' => [
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'password' => env('REDIS_PASSWORD', null),
+        'port' => env('REDIS_PORT', 6379),
+        'database' => env('REDIS_CACHE_DB', 1),
+    ],
+
+],
+</pre>
+</code>
+<p class="theme__text">
+    Значения по умолчанию должны подойти для разработки. Однако вы свободно можете изменять этот массив в зависимости от своего окружения. У каждого сервера Redis, определённого в файле конфигурации, должны быть имя, хост и порт, если вы не определите единственный URL-адрес для представления соединения Redis:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    'default' => [
+        'url' => 'tcp://127.0.0.1:6379?database=0',
+    ],
+
+    'cache' => [
+        'url' => 'tls://user:password@127.0.0.1:6380?database=1',
+    ],
+
+],
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Настройка схемы подключения
+</h4>
+<p class="theme__text">
+    По умолчанию клиенты Redis будут использовать схему tcp при подключении к вашим серверам Redis; однако вы можете использовать шифрование TLS / SSL, указав параметр конфигурации scheme в конфигурации сервера Redis:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    'default' => [
+        'scheme' => 'tls',
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'password' => env('REDIS_PASSWORD', null),
+        'port' => env('REDIS_PORT', 6379),
+        'database' => env('REDIS_DB', 0),
+    ],
+
+],
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Настройка кластеров
+</h4>
+<p class="theme__text">
+    Если ваше приложение использует кластер серверов Redis, вы должны определить эти кластеры в ключе clusters вашей конфигурации Redis:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    'clusters' => [
+        'default' => [
+            [
+                'host' => env('REDIS_HOST', 'localhost'),
+                'password' => env('REDIS_PASSWORD', null),
+                'port' => env('REDIS_PORT', 6379),
+                'database' => 0,
+            ],
+        ],
+    ],
+
+],
+</pre>
+</code>
+<p class="theme__text">
+    По умолчанию кластеры будут выполнять сегментирование ваших узлов на стороне клиента, что позволяет объединять узлы в пул и создавать большой объем доступной оперативной памяти. Однако обратите внимание, что сегментирование на стороне клиента не обрабатывает отработку отказа; поэтому он в первую очередь подходит для кэшированных данных, доступных из другого первичного хранилища данных. Если вы хотите использовать собственную кластеризацию Redis, вы должны указать это в ключе options вашей конфигурации Redis:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    'options' => [
+        'cluster' => env('REDIS_CLUSTER', 'redis'),
+    ],
+
+    'clusters' => [
+        // ...
+    ],
+
+],
+</pre>
+</code>
+<p class="theme__text">
+    Параметр cluster сообщает клиенту Redis Laravel, что нужно выполнить фрагментацию узлов Redis (client-side sharding), что позволит вам обращаться к ним и увеличить доступную RAM. Однако заметьте, что фрагментация не справляется с падениями, поэтому она в основном используется для кэшированных данных, которые доступны из основного источника.
+</p>
+<h3 class="theme__subtitle">
+    Predis
+</h3>
+<p class="theme__text">
+    Чтобы использовать расширение Predis, вы должны изменить переменную среды REDIS_CLIENT с phpredis на predis:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'predis'),
+
+    // Rest of Redis configuration...
+],
+</pre>
+</code>
+<p class="theme__text">
+    Помимо стандартных опций настройки сервера host, port, database и password Predis поддерживает дополнительные параметры подключения, которые можно определить для каждого из ваших серверов Redis. Чтобы использовать эти дополнительные опции, просто добавьте их в конфигурацию вашего сервера Redis в файле config/database.php:
+</p>
+<code>
+<pre>
+'default' => [
+    'host' => env('REDIS_HOST', 'localhost'),
+    'password' => env('REDIS_PASSWORD', null),
+    'port' => env('REDIS_PORT', 6379),
+    'database' => 0,
+    'read_write_timeout' => 60,
+],
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    PhpRedis
+</h3>
+<p class="theme__text">
+    Расширение PhpRedis настроено по умолчанию в REDIS_CLIENT env и в вашем config / database.php:
+</p>
+<code>
+<pre>
+'redis' => [
+
+    'client' => env('REDIS_CLIENT', 'phpredis'),
+
+    // Rest of Redis configuration...
+],
+</pre>
+</code>
+<p class="theme__text">
+    Если вы планируете использовать расширение PhpRedis вместе с псевдонимом Redis Facade, вам следует переименовать его во что-нибудь другое, например RedisManager, чтобы избежать столкновения с классом Redis. Вы можете сделать это в разделе псевдонимов вашего конфигурационного файла app.php.
+</p>
+<code>
+<pre>
+'RedisManager' => Illuminate\Support\Facades\Redis::class,
+</pre>
+</code>
+<p class="theme__text">
+    В дополнение к параметрам конфигурации сервера по умолчанию, host, port, database, and password, PhpRedis поддерживает следующие дополнительные параметры подключения: persistent, prefix, read_timeout, retry_interval, timeout, and context. Вы можете добавить любую из этих опций в конфигурацию вашего сервера Redis в файле конфигурации config / database.php:
+</p>
+<code>
+<pre>
+'default' => [
+    'host' => env('REDIS_HOST', 'localhost'),
+    'password' => env('REDIS_PASSWORD', null),
+    'port' => env('REDIS_PORT', 6379),
+    'database' => 0,
+    'read_timeout' => 60,
+    'context' => [
+        // 'auth' => ['username', 'secret'],
+        // 'stream' => ['verify_peer' => false],
+    ],
+],
+</pre>
+</code>
+<h4 class="theme_subtitlex2">The Redis Facade</h4>
+<p class="theme__text">
+    Чтобы избежать конфликтов именования классов с самим расширением Redis PHP, вам необходимо удалить или переименовать псевдоним фасада Illuminate \ Support \ Facades \ Redis из массива псевдонимов файла конфигурации app. Как правило, вы должны полностью удалить этот псевдоним и ссылаться на фасад только по его полному имени класса при использовании расширения Redis PHP.
+</p>
+<h3 class="theme__subtitle">Взаимодействие с Redis</h3>
+<p class="theme__text">
+    Вы можете взаимодействовать с Redis, вызывая различные методы фасада Redis. Фасад Redis поддерживает динамические методы, а значит вы можете вызвать любую Redis-команду на фасаде, и команда будет передана прямо в Redis. В этом примере мы вызовем Redis-команду GET с помощью вызова метода get() фасада Redis:
+</p>
+<code>
+<pre>
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redis;
+
+class UserController extends Controller
+{
+    public function showProfile($id)
+    {
+        $user = Redis::get('user:profile:'.$id);
+
+        return view('user.profile', ['user' => $user]);
+    }
+}
+</pre>
+</code>
+<p class="theme__text">
+    Как уже было сказано, вы можете вызывать любые Redis-команды фасада Redis. Laravel использует магические методы PHP для передачи команд на сервер Redis, поэтому просто передайте необходимые аргументы Redis-команде:
+</p>
+<code>
+<pre>
+Redis::set('name', 'Taylor');
+
+$values = Redis::lrange('names', 5, 10);
+</pre>
+</code>
+<p class="theme__text">
+    В качестве альтернативы вы можете передавать команды на сервер методом command(), который принимает первым аргументом имя команды, а вторым — массив значений:
+</p>
+<code>
+<pre>
+$values = Redis::command('lrange', ['name', 5, 10]);
+</pre>
+</code>
+<h4 class="theme_subtitlex2">Использование нескольких подключений Redis</h4>
+<p class="theme__text">
+    Вы можете получить экземпляр Redis методом Redis::connection():
+</p>
+<code>
+<pre>
+$redis = Redis::connection();
+</pre>
+</code>
+<p class="theme__text">
+    Это даст вам экземпляр сервера Redis по умолчанию. Вы также можете передать имя подключения или кластера методу connection, чтобы получить конкретный сервер или кластер, как определено в вашей конфигурации Redis:
+</p>
+<code>
+<pre>
+$redis = Redis::connection('my-connection');
+</pre>
+</code>
+<h3 class="theme__subtitle">Конвейер команд</h3>
+<p class="theme__text">
+    Конвейер должен использоваться, когда вы отправляете много команд на сервер за одну операцию. Метод pipeline() принимает один аргумент — замыкание, которое получает экземпляр Redis. Вы можете выполнить все ваши команды на этом экземпляре Redis, и все они будут выполнены в рамках одной операции:
+</p>
+<code>
+<pre>
+Redis::pipeline(function ($pipe) {
+    for ($i = 0; $i < 1000; $i++) {
+        $pipe->set("key:$i", $i);
+    }
+});
+</pre>
+</code>
+<h3 class="theme__subtitle">
+    Издатель/подписчик (Pub/Sub)
+</h3>
+<p class="theme__text">
+    Laravel предоставляет удобный интерфейс к Redis-командам publish и subscribe. Эти команды позволяют прослушивать сообщения на заданном «канале». Вы можете публиковать сообщения в канал из другого приложения или даже при помощи другого языка программирования, что обеспечивает простую связь между приложениями и процессами.
+    <br><br>
+    Сначала давайте настроим слушатель канала с помощью метода subscribe(). Мы поместим вызов этого метода в Artisan-команду, так как вызов метода subscribe() запускает длительный процесс:
+</p>
+<code>
+<pre>
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis;
+
+class RedisSubscribe extends Command
+{
+    protected $signature = 'redis:subscribe';
+
+    protected $description = 'Subscribe to a Redis channel';
+
+    public function handle()
+    {
+        Redis::subscribe(['test-channel'], function ($message) {
+            echo $message;
+        });
+    }
+}
+</pre>
+</code>
+<p class="theme__text">
+    Теперь мы можем публиковать сообщения в канал методом publish():
+</p>
+<code>
+<pre>
+Route::get('publish', function () {
+    // Route logic...
+
+    Redis::publish('test-channel', json_encode(['foo' => 'bar']));
+});
+</pre>
+</code>
+<h4 class="theme_subtitlex2">
+    Подписка по маске
+</h4>
+<p class="theme__text">
+    С помощью метода psubscribe() вы можете подписаться на канал по маске, это может быть полезно для отлова всех сообщений на всех каналах. Название канала $channel будет передано вторым аргументом в предоставляемый обратный вызов замыкания:
+</p>
+<code>
+<pre>
+Redis::psubscribe(['*'], function ($message, $channel) {
+    echo $message;
+});
+
+    Redis::psubscribe(['users.*'], function ($message, $channel) {
+    echo $message;
+});
+</pre>
+</code>
     </div>
 </div>
-
-
-
-{{--
-<h2 class="theme__title"></h2>
-<h3 class="theme__subtitle"></h3>
-<h4 class="theme_subtitlex2"></h4>
-<p class="theme__text"></p>
-<code>
-<pre>
-</pre>
-</code>
---}}
 @endsection
 
 

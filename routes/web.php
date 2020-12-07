@@ -48,6 +48,9 @@ Route::get('/laravel/database', function() {
     return view('laravel.database.index');
 });
 
+Route::get('/laravel/deep_study', function() {
+    return view('laravel.deep_study.index');
+});
 
 Route::get('/laravel/architecture', function() {
     return view('laravel.architecture.index');
@@ -108,3 +111,16 @@ Route::get('/laravel/security', function() {
 // 5) Линукс
 // 6) Хакинг
 // 7) C++
+
+
+
+//  https://refactoring.guru/ru/design-patterns/composite
+//     https://refactoring.guru/ru
+//     https://vk.com/doc232854130_363180666?hash=3cf084e0f49818490b&dl=1df87a3e56130d1582
+//     https://losst.ru/wp-content/uploads/2016/08/progit-ru.1027.pdf
+//     https://server.179.ru/tasks/cpp/total/
+//     https://www.youtube.com/watch?v=Rp9e1Y-vdBM
+//     https://www.youtube.com/watch?v=PQ1C_0EAHFI
+//     http://helpexe.ru/programmirovanie/kak-sdelat-okno-koda-visual-studio-prozrachnym-v
+//     https://laravel.ru/docs/v5/schema
+//     базы данных книги
